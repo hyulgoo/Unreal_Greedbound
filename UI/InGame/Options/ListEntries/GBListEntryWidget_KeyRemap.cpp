@@ -5,7 +5,7 @@
 #include "Define/GBTags.h"
 #include "UI/InGame/Options/DataObjects/GBListDataObject_KeyRemap.h"
 #include "UI/InGame/Component/GBCommonButtonBase.h"
-#include "UI/InGame/GBKeyRemapScreenWidget.h"
+#include "UI/InGame/Options/GBKeyRemapScreenWidget.h"
 #include "UI/GBUIFunctionLibrary.h"
 #include "Subsystem/UI/GBUISubsystem.h"
 

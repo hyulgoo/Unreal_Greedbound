@@ -22,18 +22,19 @@ void UGBInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
     DOREPLIFETIME_CONDITION(UGBInventoryComponent, InventoryList, COND_OwnerOnly);
 }
 
-void UGBInventoryComponent::InitSlots(int32 InMaxSlotCount)
+void UGBInventoryComponent::InitInventory(int32 InMaxSlotCount)
 {
     GB_CONDITION_CHECK(GetOwner() && GetOwner()->HasAuthority());
 
+    MaxSlotCount = InMaxSlotCount;
     InventoryList.OwnerComponent = this;
-    InventoryList.Slots.SetNum(InMaxSlotCount);
-    for (FGBInventorySlot& Slot : InventoryList.Slots)
+    for (int32 Index = 0; Index < MaxSlotCount; ++Index)
     {
-        Slot.MakeEmpty();
+        FGBInventorySlot NewSlot = FGBInventorySlot();
+        InventoryList.Slots.Add(NewSlot);
+        InventoryList.Slots[Index].MakeEmpty();
+        InventoryList.MarkItemDirty(InventoryList.Slots[Index]);
     }
-
-    MarkArrayDirty();
 }
 
 bool UGBInventoryComponent::Server_MoveOrSwap(int32 FromIndex, int32 ToIndex)
@@ -105,8 +106,9 @@ bool UGBInventoryComponent::Server_Merge(int32 FromIndex, int32 ToIndex)
 
     int32 MaxStack = -1;
 
-    UGBAssetLoadSubsystem::Get(this)->LoadItemDataByAssetId(FromSlot.ItemId, FOnItemLoaded::CreateWeakLambda
-    (this, [this, MaxStack](bool bSuccess, UGBBaseItemData* ItemData) mutable
+    UGBAssetLoadSubsystem::Get(this)->LoadItemDataByAssetId(FromSlot.ItemId, 
+        FOnItemLoaded::CreateWeakLambda(this, 
+        [this, MaxStack](bool bSuccess, UGBBaseItemData* ItemData) mutable
         {
             if (bSuccess && ItemData)
             {
@@ -195,4 +197,20 @@ void UGBInventoryComponent::MarkArrayDirty()
 bool UGBInventoryComponent::IsValidSlot(int32 Index) const
 {
     return InventoryList.Slots.IsValidIndex(Index);
+}
+
+void UGBInventoryComponent::OnItemAdded(FPrimaryAssetId ItemDataId, int32 Count)
+{
+    GB_CONDITION_CHECK(ItemDataId.IsValid());
+
+    if (GetOwner()->HasAuthority())
+    {
+        const int32 SlotIndex = InventoryList.TryPush(ItemDataId, Count);
+        if (InventoryList.Slots.IsValidIndex(SlotIndex) == false)
+        {
+            return;
+        }
+
+        InventoryList.MarkItemDirty(InventoryList.Slots[SlotIndex]);
+    }
 }

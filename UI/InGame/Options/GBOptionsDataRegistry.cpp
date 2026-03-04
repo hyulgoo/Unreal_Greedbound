@@ -61,7 +61,7 @@ TArray<UGBListDataObject_Base*> UGBOptionsDataRegistry::GetListSourceItemBySelec
 
 void UGBOptionsDataRegistry::FindChildListDataRecursively(UGBListDataObject_Base* InParentData, TArray<UGBListDataObject_Base*>& OutChildDataList) const
 {
-    GB_CONDITION_CHECK_WITHOUT_LOG(InParentData != nullptr && InParentData->HasAnyChildListData());
+    GB_CONDITION_CHECK(InParentData != nullptr && InParentData->HasAnyChildListData());
 
     const TArray<UGBListDataObject_Base*>& ChildListDataList = InParentData->GetAllChildListData();
     for (UGBListDataObject_Base* SubShildListData : ChildListDataList)

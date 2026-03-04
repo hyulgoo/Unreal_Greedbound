@@ -2,6 +2,7 @@
 
 #include "GBTA_Trace.h"
 #include "Define/GBCollision.h"
+#include "GBTargetDataFilter.h"
 
 void AGBTA_Trace::StartTargeting(UGameplayAbility* Ability)
 {
@@ -9,9 +10,9 @@ void AGBTA_Trace::StartTargeting(UGameplayAbility* Ability)
 
     FHitResult HitResult;
     FGameplayTargetDataFilterHandle FilterHandle;
-    FGameplayTargetDataFilter* NewFilter = new FGameplayTargetDataFilter();
+    FGBGameplayTargetDataFilter* NewFilter = new FGBGameplayTargetDataFilter();
     NewFilter->InitializeFilterContext(StartLocation.SourceActor);
-    FilterHandle.Filter = TSharedPtr<FGameplayTargetDataFilter>(NewFilter);
+    FilterHandle.Filter = TSharedPtr<FGBGameplayTargetDataFilter>(NewFilter);
 
     const FVector& Start = GetOwner()->GetActorLocation();
     const FVector End = Start + (GetOwner()->GetActorForwardVector() * MaxRange);

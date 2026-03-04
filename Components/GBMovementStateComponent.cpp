@@ -1,65 +1,23 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GBMovementStateComponent.h"
-#include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Define/GBDefine.h"
+#include "AbilitySystem/Attribute/GBSpeedAttributeSet.h"
 
-EGBStanceState UGBMovementStateComponent::GetCharacterStanceState() const
+void UGBMovementStateComponent::BeginPlay()
 {
-    return StanceStateType;
+    Super::BeginPlay();
+
+    Movement = GetOwner()->GetComponentByClass<UCharacterMovementComponent>();
 }
 
-void UGBMovementStateComponent::SetCharacterStanceState(const EGBStanceState NewState)
+void UGBMovementStateComponent::OnCurrentSpeedChanged(const FOnAttributeChangeData& Payload)
 {
-    StanceStateType = NewState;
-}
+    GB_NULL_CHECK(Movement);
 
-EGBStopState UGBMovementStateComponent::GetCharacterStopState() const
-{
-    return StopStateType;
-}
-
-void UGBMovementStateComponent::SetCharacterStopState(const EGBStopState NewState)
-{
-    StopStateType = NewState;
-}
-
-EGBMoveState UGBMovementStateComponent::GetCharacterMoveState() const
-{
-    return MoveStateType;
-}
-
-void UGBMovementStateComponent::SetCharacterMoveState(const EGBMoveState NewState)
-{
-    MoveStateType = NewState;
-}
-
-UAnimMontage* UGBMovementStateComponent::GetTurnInPlaceMontage()
-{
-    return TurnInPlaceMontage;
-}
-
-void UGBMovementStateComponent::SetLastRotation()
-{
-    if (IsValid(GetOwner()))
+    if (Payload.Attribute == UGBSpeedAttributeSet::GetCurrentSpeedAttribute())
     {
-        LastRotation = GetOwner()->GetActorRotation();
+        Movement->MaxWalkSpeed = Payload.NewValue;
     }
-}
-
-FRotator UGBMovementStateComponent::GetDeltaRotation() const
-{
-    GB_VALID_CHECK_WITH_RETURN(GetOwner(), FRotator::ZeroRotator);
-
-    return UKismetMathLibrary::NormalizedDeltaRotator(GetOwner()->GetActorRotation(), LastRotation);
-}
-
-bool UGBMovementStateComponent::IsMovable() const
-{
-    return bIsMovable;
-}
-
-void UGBMovementStateComponent::SetMovable(const bool bMovable)
-{
-    bIsMovable = bMovable;
 }

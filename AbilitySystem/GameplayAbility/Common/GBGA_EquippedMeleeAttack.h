@@ -7,7 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "GBGA_EquippedMeleeAttack.generated.h"
 
-class UGBCombatData;
+class UGBCombatComponent;
 class UGBAT_WaitMeleeAttackTargetData;
 class AGameplayAbilityTargetActor;
 
@@ -25,8 +25,6 @@ protected:
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<AGameplayAbilityTargetActor>    MeleeAttackTargetActorClass;
 
-private:
     UPROPERTY()
     TObjectPtr<UGBAT_WaitMeleeAttackTargetData> WaitMeleeAttackTargetDataTask;
-
 };

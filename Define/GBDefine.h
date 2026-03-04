@@ -37,13 +37,6 @@ if(ptr == nullptr) \
     return; \
 } \
 
-/// ptr가 nullptr이면 return
-#define GB_NULL_CHECK_WITHOUT_LOG(ptr) \
-if(ptr == nullptr) \
-{ \
-    return; \
-} \
-
 // ptr가 nullptr이면 ret을 return
 #define GB_NULL_CHECK_WITH_RETURN(ptr, ret) \
 if(ptr == nullptr) \
@@ -79,13 +72,6 @@ if(IsValid(ptr) == false) \
     return ret; \
 } \
 
-/// UObject를 상속받는 객체포인터를 대상으로 IsValid(ptr)이 실패하면 return
-#define GB_VALID_CHECK_WITHOUT_LOG(ptr) \
-if(IsValid(ptr) == false) \
-{ \
-    return; \
-} \
-
 /// 인자로 들어가는 조건이 false라면 로그를 출력하고 return
 #define GB_CONDITION_CHECK(condition) \
 if(condition == false) \
@@ -107,20 +93,6 @@ if(condition == false) \
         UE_LOG(LogTemp, Error, TEXT("[%s] is false!, At Function: %s (%s:%d)"), \
             TEXT(#condition), ANSI_TO_TCHAR(__FUNCTION__), ANSI_TO_TCHAR(SHORT_FILE_NAME), __LINE__); \
     } \
-    return ret; \
-} \
-
-/// 인자로 들어가는 조건이 false라면 return
-#define GB_CONDITION_CHECK_WITHOUT_LOG(condition) \
-if(condition == false) \
-{ \
-    return; \
-} \
-
-/// 인자로 들어가는 조건이 false라면 return
-#define GB_CONDITION_CHECK_WITH_RETURN_WITHOUT_LOG(condition, ret) \
-if(condition == false) \
-{ \
     return ret; \
 } \
 

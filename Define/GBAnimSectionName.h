@@ -44,7 +44,7 @@ public:
 
     static const FName GetDeathSectionNameByDirection(const float Direction)
     {
-        FName SectionName;
+        FName SectionName = NAME_None;
         if (Direction == static_cast<float>(EGBDirection::Forward))
         {
             SectionName = GBANIMSECTIONNAME_DEATH_FRONT;
@@ -66,7 +66,7 @@ public:
 
     static const FName GetHitReactionNameByDirection(const float Direction)
     {
-        FName SectionName;
+        FName SectionName = NAME_None;
         if (Direction == static_cast<float>(EGBDirection::NoReact))
         {
             SectionName = GBANIMSECTIONNAME_HITREACTION_NOREACT;
@@ -87,6 +87,21 @@ public:
         {
             SectionName = GBANIMSECTIONNAME_HITREACTION_BACK;
         }
+        return SectionName;
+    }
+
+    static const FName GetTurnInPlaceSectionName(const float Direction)
+    {
+        FName SectionName = NAME_None;
+        if (Direction == static_cast<float>(EGBDirection::Left))
+        {
+            SectionName = GBANIMSECTIONNAME_TURN_LEFT;
+        }
+        else if (Direction == static_cast<float>(EGBDirection::Right))
+        {
+            SectionName = GBANIMSECTIONNAME_TURN_RIGHT;
+        }
+
         return SectionName;
     }
 };

@@ -1,22 +1,13 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GBCombatComponent.h"
-#include "InteractionObject/Weapon/GBWeapon.h"
 #include "Define/GBDefine.h"
-
-void UGBCombatComponent::SetCombatState(const EGBCombatState NewState)
-{
-    CombatState = NewState;
-}
-
-EGBCombatState UGBCombatComponent::GetCombatState() const
-{
-    return CombatState;
-}
+#include "InteractionObject/Weapon/GBWeapon.h"
 
 void UGBCombatComponent::EquipWeapon(AGBWeapon* NewWeapon)
 {
     GB_NULL_CHECK(NewWeapon);
+    GB_VALID_CHECK(GetOwner());
 
     if (GetOwner()->HasAuthority() == false)
     {

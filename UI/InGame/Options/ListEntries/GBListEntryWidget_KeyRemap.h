@@ -15,7 +15,6 @@ class GREEDBOUND_API UGBListEntryWidget_KeyRemap : public UGBListEntryWidget_Bas
 	GENERATED_BODY()
 
 protected:
-
     virtual void                            NativeOnInitialized() override final;
 
     virtual void                            OnOwingListDataObjectSet(UGBListDataObject_Base* InOwningListDataObject) override final;

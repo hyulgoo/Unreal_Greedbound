@@ -1,43 +1,49 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GBGA_UnequippedAttack.h"
-#include "Interface/GBCharacterCombatInterface.h"
 #include "Abilities/GameplayAbilityTargetActor_Trace.h"
-#include "Define/GBDefine.h"
 #include "Define/GBTags.h"
+#include "Components/GBCombatComponent.h"
+#include "Define/GBDefine.h"
 
 UGBGA_UnequippedAttack::UGBGA_UnequippedAttack(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
     : Super(ObjectInitializer)
 {
     InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-    EventTags.AddTag(GBTag::Event_Common_Attack);
+    EventReceiveTags.AddTag(GBTag::Event_Common_Attack);
 }
 
 void UGBGA_UnequippedAttack::OnEventReceived(const FGameplayTag EventTag, FGameplayEventData EventData)
 {
     Super::OnEventReceived(EventTag, EventData);
 
+    if (HasAuthority(&CurrentActivationInfo) == false)
+    {
+        return;
+    }
+
     if (EventTag == GBTag::Event_Common_Attack)
     {
         AActor* AvatarActor = GetAvatarActorFromActorInfo();
-        GB_NULL_CHECK_WITHOUT_LOG(AvatarActor);
+        if (AvatarActor == nullptr)
+        {
+            return;
+        }
 
         const FVector& Start = AvatarActor->GetActorLocation();
         const FVector& ForwardVector = AvatarActor->GetActorForwardVector();
         const FVector& End = Start + (ForwardVector * AttackRange);
 
         UWorld* World = GetWorld();
+        GB_VALID_CHECK(World);
+
+        GB_NULL_CHECK(CombatComponent);
 
         FHitResult HitResult;
         FCollisionQueryParams Params;
         Params.AddIgnoredActor(AvatarActor);
 
-        FName AttackProfile;
-        if (TScriptInterface<IGBCharacterCombatInterface> CombatInterface = AvatarActor)
-        {
-            AttackProfile = CombatInterface->GetAttackProfile();
-        }
-
+        const FName& AttackProfile = CombatComponent->GetAttackProfile();
         AGameplayAbilityTargetActor_Trace::LineTraceWithFilter(HitResult, World, FGameplayTargetDataFilterHandle(), Start, End, AttackProfile, Params);
         if (HitResult.bBlockingHit)
         {

@@ -21,7 +21,7 @@ void UGBAbilitySystemComponent::AbilityTagTriggered(const FGameplayTag AssetTag)
     GB_CONDITION_CHECK(AssetTag.IsValid());
 
     TArray<FGameplayAbilitySpec*> ActivatebleAbilities;
-    GetAbilitySpecsByTag(AssetTag, ActivatebleAbilities);
+    GetAbilitySpecsByAssetTag(AssetTag, ActivatebleAbilities);
     for (FGameplayAbilitySpec* Spec : ActivatebleAbilities)
     {
         if (Spec->IsActive())
@@ -40,7 +40,7 @@ void UGBAbilitySystemComponent::AbilityTagReleased(const FGameplayTag AssetTag)
     GB_CONDITION_CHECK(AssetTag.IsValid());
 
     TArray<FGameplayAbilitySpec*> ActivatebleAbilities;
-    GetAbilitySpecsByTag(AssetTag, ActivatebleAbilities);
+    GetAbilitySpecsByAssetTag(AssetTag, ActivatebleAbilities);
     for (FGameplayAbilitySpec* Spec : ActivatebleAbilities)
     {
         if (Spec->IsActive())
@@ -55,7 +55,7 @@ void UGBAbilitySystemComponent::AbilityTagToggled(const FGameplayTag AssetTag)
     GB_CONDITION_CHECK(AssetTag.IsValid());
 
     TArray<FGameplayAbilitySpec*> ActivatebleAbilities;
-    GetAbilitySpecsByTag(AssetTag, ActivatebleAbilities);
+    GetAbilitySpecsByAssetTag(AssetTag, ActivatebleAbilities);
     for (FGameplayAbilitySpec* Spec : ActivatebleAbilities)
     {
         if (Spec == nullptr)
@@ -88,14 +88,14 @@ const FGameplayTagContainer& UGBAbilitySystemComponent::GetActivationOwnedTags(U
     return GBAbility->GetActivationOwnedTags();
 }
 
-EGBTriggerType UGBAbilitySystemComponent::GetAbilityTriggerTypeByTag(FGameplayTag AssetTag) const
+EGBTriggerType UGBAbilitySystemComponent::GetAbilityTriggerTypeByAssetTag(FGameplayTag AssetTag) const
 {
     GB_NULL_CHECK_WITH_RETURN(InputData, EGBTriggerType::None);
     GB_CONDITION_CHECK_WITH_RETURN(AssetTag.IsValid(), EGBTriggerType::None);
     return InputData->GetTriggerTypeByTag(AssetTag);
 }
 
-void UGBAbilitySystemComponent::GetAbilitySpecsByTag(const FGameplayTag AssetTag, TArray<FGameplayAbilitySpec*>& Outlist)
+void UGBAbilitySystemComponent::GetAbilitySpecsByAssetTag(const FGameplayTag AssetTag, TArray<FGameplayAbilitySpec*>& Outlist)
 {
     GB_CONDITION_CHECK(AssetTag.IsValid());
 
@@ -110,7 +110,7 @@ void UGBAbilitySystemComponent::GetAbilitySpecsByTag(const FGameplayTag AssetTag
     }
 }
 
-void UGBAbilitySystemComponent::GetGameplayEffectDurationByTag(const FGameplayTag EffectTag, float& OutRemainingTime, float& OutTotalDuration)
+void UGBAbilitySystemComponent::GetGameplayEffectDurationByAssetTag(const FGameplayTag EffectTag, float& OutRemainingTime, float& OutTotalDuration)
 {
     OutRemainingTime = 0.f;
     OutTotalDuration = 0.f;
@@ -141,7 +141,7 @@ void UGBAbilitySystemComponent::GetGameplayEffectDurationByTag(const FGameplayTa
     }
 }
 
-void UGBAbilitySystemComponent::GetAbilityCoolTimeByTag(const FGameplayTag AssetTag, float& OutRemainingTime, float& OutTotalDuration)
+void UGBAbilitySystemComponent::GetAbilityCoolTimeByAssetTag(const FGameplayTag AssetTag, float& OutRemainingTime, float& OutTotalDuration)
 {
     OutRemainingTime = 0.f;
     OutTotalDuration = 0.f;
@@ -149,7 +149,7 @@ void UGBAbilitySystemComponent::GetAbilityCoolTimeByTag(const FGameplayTag Asset
     GB_CONDITION_CHECK(AssetTag.IsValid());
 
     TArray<FGameplayAbilitySpec*> AbilitySpecs;
-    GetAbilitySpecsByTag(AssetTag, AbilitySpecs);
+    GetAbilitySpecsByAssetTag(AssetTag, AbilitySpecs);
 
     for (FGameplayAbilitySpec* AbilitySpec : AbilitySpecs)
     {

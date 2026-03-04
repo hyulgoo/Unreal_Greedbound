@@ -6,7 +6,6 @@
 #include "Components/ListView.h"
 #include "CommonInputSubsystem.h"
 #include "Define/GBDefine.h"
-
 void UGBListEntryWidget_Base::NativeOnListEntryWidgetHovered(bool bWasHovered)
 {
     BP_OnListEntryWidgetHovered(bWasHovered, GetListItem() ? IsListItemSelected() : false);
@@ -20,6 +19,7 @@ void UGBListEntryWidget_Base::NativeOnListEntryWidgetHovered(bool bWasHovered)
         BP_OnToggleEntryWidgetHighlightState(GetListItem() && IsListItemSelected());
     }
 }
+
 
 void UGBListEntryWidget_Base::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
@@ -81,11 +81,6 @@ void UGBListEntryWidget_Base::OnOwingListDataObjectSet(UGBListDataObject_Base* I
     OnToggledEditableState(InOwningListDataObject->IsDataCurrentlyEditable());
 
     CachedOwningDataObject = InOwningListDataObject;
-}
-
-void UGBListEntryWidget_Base::OnOwningListDataObjectModified(UGBListDataObject_Base* InListDataObject, EGBOptionsListDataModifyReason ModifyReason)
-{
-    GB_NULL_CHECK(InListDataObject);
 }
 
 void UGBListEntryWidget_Base::OnOwningDependencyDataObjectModified(UGBListDataObject_Base* InDependencyDataObject, EGBOptionsListDataModifyReason ModifyReason)

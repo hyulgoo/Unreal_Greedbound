@@ -1,7 +1,7 @@
 ﻿#include "BTDecorator_InAttackRange.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
-#include "Interface/GBCharacterCombatInterface.h"
+#include "Interface/GBCombatInterface.h"
 #include "Define/GBDefine.h"
 
 UBTDecorator_InAttackRange::UBTDecorator_InAttackRange(const FObjectInitializer& ObjectInitializer)
@@ -24,7 +24,7 @@ bool UBTDecorator_InAttackRange::CalculateRawConditionValue(UBehaviorTreeCompone
     AActor* Target = Cast<AActor>(BBComp->GetValueAsObject(TargetKey.SelectedKeyName));
     GB_NULL_CHECK_WITH_RETURN(Target, false);
 
-    IGBCharacterCombatInterface* CombatInterface = Cast<IGBCharacterCombatInterface>(Pawn);
+    TScriptInterface<IGBCombatInterface> CombatInterface = Pawn;
     GB_NULL_CHECK_WITH_RETURN(CombatInterface, false);
 
     // CombatData 없애서 일단 하드코딩 박아놓음 추후 수정할 것

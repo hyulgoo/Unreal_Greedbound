@@ -27,3 +27,11 @@ enum class EGBEquipSlotType : uint8
     Legs,
     Weapon,
 };
+
+UENUM(BlueprintType)
+enum class EGBInteractionType : uint8
+{
+    None,
+    Item,
+    Activate,
+};

@@ -6,7 +6,6 @@
 #include "UI/InGame/PlayerInfo/GBPlayerHUDWidget.h"
 #include "AbilitySystem/Attribute/GBHealthAttributeSet.h"
 #include "AbilitySystem/Attribute/GBSpeedAttributeSet.h"
-#include "AbilitySystem/GBGameplayAbilityHelper.h"
 
 void AGBInGameHUD::SetAbilitySystemComponent(UAbilitySystemComponent* ASC)
 {
@@ -35,9 +34,9 @@ void AGBInGameHUD::CreatePlayerHUDWidget()
                 AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UGBSpeedAttributeSet::GetMaxStaminaAttribute())
                     .AddUObject(PlayerHUDWidget, &UGBPlayerHUDWidget::OnSpeedAttributeChanged);
 
-                const FGameplayTagContainer& BuffTags = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::State_Buff);
-                const FGameplayTagContainer& DebuffTags = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::State_Debuff);
-                const FGameplayTagContainer& CooldownTags = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::State_Cooldown);
+                const FGameplayTagContainer& BuffTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Buff);
+                const FGameplayTagContainer& DebuffTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Debuff);
+                const FGameplayTagContainer& CooldownTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Cooldown);
 
                 for(const FGameplayTag BuffTag : BuffTags)
                 {
@@ -54,7 +53,7 @@ void AGBInGameHUD::CreatePlayerHUDWidget()
                     AbilitySystemComponent->RegisterGameplayTagEvent(CooldownTag, EGameplayTagEventType::NewOrRemoved).AddUObject(PlayerHUDWidget, &UGBPlayerHUDWidget::OnSkillCooldownChanged);
                 }
 
-                AbilitySystemComponent->RegisterGameplayTagEvent(GBTag::State_EquipState_Equipped, EGameplayTagEventType::NewOrRemoved).AddUObject(PlayerHUDWidget, &UGBPlayerHUDWidget::OnSkillInfoChanged);
+                AbilitySystemComponent->RegisterGameplayTagEvent(GBTag::State_Combat_Equipped, EGameplayTagEventType::NewOrRemoved).AddUObject(PlayerHUDWidget, &UGBPlayerHUDWidget::OnSkillInfoChanged);
             }
 
             PlayerHUDWidget->AddToViewport();

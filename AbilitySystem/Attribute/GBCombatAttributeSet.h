@@ -19,10 +19,11 @@ public:
     ATTRIBUTE_ACCESSORS_BASIC(UGBCombatAttributeSet, Attack);
     ATTRIBUTE_ACCESSORS_BASIC(UGBCombatAttributeSet, Defense);
 
-    virtual bool            PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data) override final;
-    virtual void            PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override final {};
-    virtual void            PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override final {};
-    virtual void            PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override final {};
+    // 아래 4개 함수는 부모에서 구현부가 없는 함수이므로 Super 호출하지 말 것
+    //virtual bool            PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data) override final {};
+    //virtual void            PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override final {};
+    //virtual void            PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override final {};
+    //virtual void            PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override final {};
 
     virtual void            GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override final;
     

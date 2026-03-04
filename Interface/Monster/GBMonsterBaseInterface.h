@@ -18,6 +18,7 @@ class GREEDBOUND_API IGBMonsterBaseInterface
 {
     GENERATED_BODY()
 
-public:
-    virtual UGBMonsterBaseData* GetMonsterBaseData() const = 0;
+public:    
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+    UGBMonsterBaseData* GetMonsterBaseData() const;
 };

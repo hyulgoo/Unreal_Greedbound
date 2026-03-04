@@ -1,10 +1,12 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GBTA_MeleeAttack.h"
-#include "Define/GBDefine.h"
-#include "Define/GBCollision.h"
 #include "KismetTraceUtils.h"
 #include "Abilities/GameplayAbilityTargetActor_Trace.h"
+#include "Define/GBDefine.h"
+#include "Define/GBCollision.h"
+#include "Define/GBTags.h"
+#include "AbilitySystem/TargetActor/GBTargetDataFilter.h"
 
 AGBTA_MeleeAttack::AGBTA_MeleeAttack(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -19,10 +21,10 @@ void AGBTA_MeleeAttack::StartTargeting(UGameplayAbility* Ability)
 
     SetActorTickEnabled(true);
 
-    if(StartLocation.SourceComponent)
+    if (StartLocation.SourceComponent)
     {
         TraceSocketNames = StartLocation.SourceComponent->GetAllSocketNames();
-        for(const FName& SocketName : TraceSocketNames)
+        for (const FName& SocketName : TraceSocketNames)
         {
             TraceSocketPrevLocations.Add(SocketName, StartLocation.SourceComponent->GetSocketLocation(SocketName));
         }
@@ -46,31 +48,29 @@ void AGBTA_MeleeAttack::Tick(float DeltaSeconds)
     Params.AddIgnoredActor(StartLocation.SourceActor);
 
     UWorld* World = GetWorld();
+    GB_VALID_CHECK(World);
 
     FGameplayTargetDataFilterHandle FilterHandle;
-    FGameplayTargetDataFilter* NewFilter = new FGameplayTargetDataFilter();
+    FGBGameplayTargetDataFilter* NewFilter = new FGBGameplayTargetDataFilter();
     NewFilter->InitializeFilterContext(StartLocation.SourceActor);
+    NewFilter->FilterTags.AddTag(GBTag::State_Combat_Dead);
     FilterHandle.Filter = TSharedPtr<FGameplayTargetDataFilter>(NewFilter);
 
     for (TPair<FName, FVector>& PrevSocketLocation : TraceSocketPrevLocations)
     {
         FHitResult HitResult;
-        //FCollisionResponseParams;
         const FTransform& SocketTransform = StartLocation.SourceComponent->GetSocketTransform(PrevSocketLocation.Key);
         const FVector Start = PrevSocketLocation.Value;
-        const FVector End    = StartLocation.SourceComponent->GetSocketLocation(PrevSocketLocation.Key);
+        const FVector End = StartLocation.SourceComponent->GetSocketLocation(PrevSocketLocation.Key);
         const float Radius = 5.f;
-        
-        AGameplayAbilityTargetActor_Trace::SweepWithFilter(HitResult, World, FilterHandle, Start, End, 
+
+        AGameplayAbilityTargetActor_Trace::SweepWithFilter(HitResult, World, FilterHandle, Start, End,
             SocketTransform.Rotator().Quaternion(), FCollisionShape::MakeSphere(Radius), GBCOLLISION_PROFILE_PLAYERAOE, Params);
-        
-#if ENABLE_DRAW_DEBUG
 
         if (bDebug)
         {
             DrawDebugSweptSphere(World, Start, End, TraceSize.X / 2.f, HitResult.bBlockingHit ? FColor::Red : FColor::Green, false, 0.3f);
         }
-#endif // ENABLE_DRAW_DEBUG
 
         AActor* HitActor = HitResult.GetActor();
         if (HitResult.bBlockingHit && HitActor && AlreadyHitActors.Contains(HitActor) == false)

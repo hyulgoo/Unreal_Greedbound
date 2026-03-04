@@ -10,8 +10,8 @@
 class UCommonRichTextBlock;
 class FGBKeyRemapScreenInputPreprocessor;
 
-DECLARE_DELEGATE_OneParam(KOnKeyRemapScreenKeyPressedDelegate, const FKey& /*PressedKey*/)
-DECLARE_DELEGATE_OneParam(KOnKeyRemapScreenKeySelectedCanceledDelegate, const FString& /*CanceledReason*/)
+DECLARE_DELEGATE_OneParam(FGBOnKeyRemapScreenKeyPressedDelegate, const FKey& /*PressedKey*/)
+DECLARE_DELEGATE_OneParam(FGBOnKeyRemapScreenKeySelectedCanceledDelegate, const FString& /*CanceledReason*/)
 
 UCLASS(Abstract, BlueprintType, meta = (DisableNaiveTick))
 class GREEDBOUND_API UGBKeyRemapScreenWidget : public UGBActivatableBaseWidget
@@ -32,8 +32,8 @@ private:
     void                                            RequestDeactivateWidget(TFunction<void()> PreDeactivateCallback);
 
 public:
-    KOnKeyRemapScreenKeyPressedDelegate             OnKeyRemapScreenKeyPressed;
-    KOnKeyRemapScreenKeySelectedCanceledDelegate    OnKeyRemapScreenKeySelectedCanceled;
+    FGBOnKeyRemapScreenKeyPressedDelegate           OnKeyRemapScreenKeyPressed;
+    FGBOnKeyRemapScreenKeySelectedCanceledDelegate  OnKeyRemapScreenKeySelectedCanceled;
 
 private:
     UPROPERTY(meta = (BindWidget))

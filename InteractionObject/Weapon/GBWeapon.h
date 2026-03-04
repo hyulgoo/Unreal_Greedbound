@@ -3,15 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "GameplayTagContainer.h"
+#include "InteractionObject/GBItemBase.h"
+#include "Data/GBItemData.h"
 #include "GBWeapon.generated.h"
 
 class UCapsuleComponent;
 class UNiagaraComponent;
+class UGameplayEffect;
+class UWidgetComponent;
 
 UCLASS()
-class GREEDBOUND_API AGBWeapon : public AActor
+class GREEDBOUND_API AGBWeapon : public AGBItemBase
 {
     GENERATED_BODY()
 
@@ -22,10 +24,10 @@ public:
     void                                SetActiveTrailEffect(const bool bActive);
 
 private:
-    virtual void                        GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    // InteractableInterface
+    virtual TOptional<FPrimaryAssetId>  Interact_Implementation(AActor* Other) override final;
 
-    UFUNCTION()
-    void                                OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+    virtual void                        GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
     UFUNCTION()
     void                                OnRep_TrailEffectActive();
@@ -35,9 +37,6 @@ private:
     TObjectPtr<UStaticMeshComponent>    Mesh;
 
     UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UCapsuleComponent>       Capsule;
-
-    UPROPERTY(EditDefaultsOnly)
     TObjectPtr<UNiagaraComponent>       TrailParticle;
 
     UPROPERTY(ReplicatedUsing = OnRep_TrailEffectActive)
@@ -45,7 +44,7 @@ private:
 
     UPROPERTY(EditDefaultsOnly)
     FName                               AttachSocketName;
-
-    UPROPERTY(EditDefaultsOnly, meta = (Categories = "Character.Player"))
-    FGameplayTag                        ClassTag;
+    
+    UPROPERTY()
+    FGBItemInstanceData                 InstanceData;
 };

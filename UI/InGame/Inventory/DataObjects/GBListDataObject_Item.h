@@ -14,7 +14,11 @@ UCLASS()
 class GREEDBOUND_API UGBListDataObject_Item : public UGBListDataObject_Base
 {
 	GENERATED_BODY()
-	
+
+public:
+    const FGBInventorySlot& GetItemData() const { return ItemData; }
+    void                    SetItemData(FPrimaryAssetId ItemId, int32 ItemCount);
+
 private:
-    FGBInventorySlot ItemData;
+    FGBInventorySlot        ItemData;
 };

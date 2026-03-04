@@ -4,18 +4,20 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "AbilitySystemComponent.h"
 #include "Define/GBDefine.h"
-#include "Interface/GBCharacterCombatInterface.h"
+#include "Interface/GBCombatInterface.h"
 
 void UGBGA_CastBuff::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
     Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-    GB_CONDITION_CHECK_WITHOUT_LOG(CommitAbility(Handle, ActorInfo, ActivationInfo));
+    if (CommitAbility(Handle, ActorInfo, ActivationInfo) == false)
+    {
+        return;
+    }
 
     GB_NULL_CHECK(CastMontage);
 
-    TScriptInterface<IGBCharacterCombatInterface> CombatInterface = ActorInfo->AvatarActor.Get();
-    if (CombatInterface)
+    if (GetAvatarActorFromActorInfo()->Implements<UGBCombatInterface>())
     {
         UAbilityTask_PlayMontageAndWait* PlayMontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
             this,
@@ -38,10 +40,11 @@ void UGBGA_CastBuff::EndAbility(const FGameplayAbilitySpecHandle Handle, const F
 void UGBGA_CastBuff::ApplyGameEffect()
 {
     UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
-    if(ASC)
+    if (ASC)
     {
         const FGameplayEffectSpecHandle& SpecHandle = ASC->MakeOutgoingSpec(SkillGameEffect, 1.f, ASC->MakeEffectContext());
         GB_CONDITION_CHECK(SpecHandle.IsValid());
+
         ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data);
 
         K2_EndAbility();

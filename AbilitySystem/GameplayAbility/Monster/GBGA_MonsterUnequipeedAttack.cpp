@@ -23,7 +23,7 @@ void UGBGA_MonsterUnequipeedAttack::OnEventReceived(const FGameplayTag EventTag,
         // 발차기가 구려서 2단 콤보만 하도록 함.
         if (CurrentComboIndex < 2)
         {
-            SetShouldNextCombo(true);
+            SetContinueCombo(true);
         }
     }
 }

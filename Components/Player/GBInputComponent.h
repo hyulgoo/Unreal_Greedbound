@@ -15,7 +15,8 @@ class GREEDBOUND_API UGBInputComponent : public UEnhancedInputComponent
 
 public:
     template<typename UserClass, typename TriggeredFuncType, typename ReleasedFuncType, typename ToggledFuncType>
-    void SetTaggedInputActionDataAsset(UGBInputData* DataAsset, UserClass* Object, TriggeredFuncType TriggeredFunc, ReleasedFuncType ReleasedFunc, ToggledFuncType ToggledFunc);
+    void SetTaggedInputActionDataAsset(UGBInputData* DataAsset, UserClass* Object, TriggeredFuncType TriggeredFunc, 
+        ReleasedFuncType ReleasedFunc, ToggledFuncType ToggledFunc);
 };
 
 template<typename UserClass, typename TriggeredFuncType, typename ReleasedFuncType, typename ToggledFuncType>

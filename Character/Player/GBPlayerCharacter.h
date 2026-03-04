@@ -4,22 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Character/GBCharacterBase.h"
-#include "Define/GBCollision.h"
+#include "Interface/GBInteractionInterface.h"
 #include "GBPlayerCharacter.generated.h"
 
-class UInputComponent;
-class UGBInputData;
-class UGBInputComponent;
 class USpringArmComponent;
 class UCameraComponent;
-class UInputAction;
 class UGBEscapeHandlerComponent;
-struct FInputActionValue;
-struct FGameplayEventData;
 enum class EGBCharacterClassType : uint8;
+enum class EGBStopState : uint8;
 
 UCLASS()
-class GREEDBOUND_API AGBPlayerCharacter : public AGBCharacterBase
+class GREEDBOUND_API AGBPlayerCharacter : public AGBCharacterBase, public IGBInteractionInterface
 {
     GENERATED_BODY()
 
@@ -27,22 +22,21 @@ public:
     AGBPlayerCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
     void                                    SetCharacterClassType(const EGBCharacterClassType NewClassType);
-
-protected:
+    
+private:
     virtual void                            BeginPlay() override;
     virtual void                            Tick(float DeltaTime) override;
     virtual void                            PossessedBy(AController* NewController) override final;
-    virtual void                            OnRep_PlayerState() override final;
 
-    // CharacterMovementInterface
-    virtual void                            SetCharacterStopState(const EGBStopState NewState) override final;
+    virtual UGBInventoryComponent*          GetInventoryComponent_Implementation() const override final;
+    virtual UGBInteractionComponent*        GetInteractionComponment_Implementation() const override final { return InteractionComponent; }
 
-    virtual  FName                          GetAttackProfile() const { return GBCOLLISION_PROFILE_PLAYERAOE; }
+    void                                    InitializeFromPlayerState();
 
-private:
-    void                                    UpdateStopState();
     void                                    SprintContinue(const EGBStopState PrevState, const EGBStopState NewState);
     virtual void                            LoadCharacterData() override final;
+
+    virtual void                            OnRep_PlayerState() override final;
 
 private:
     UPROPERTY(EditDefaultsOnly)
@@ -53,6 +47,12 @@ private:
         
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Escape", Meta = (AllowPrivateAccess))
     TObjectPtr<UGBEscapeHandlerComponent>   EscapeComponent;
+
+    UPROPERTY(EditDefaultsOnly)
+    TObjectPtr<UGBInventoryComponent>       CachedInventoryComponent;
+
+    UPROPERTY(EditDefaultsOnly)
+    TObjectPtr<UGBInteractionComponent>     InteractionComponent;
 
     UPROPERTY(EditDefaultsOnly)
     EGBCharacterClassType                   ClassType;

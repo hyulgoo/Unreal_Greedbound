@@ -12,7 +12,7 @@
     DataType Get##PropertyName() const { return PropertyName; } \
     void Set##PropertyName(DataType In##PropertyName) { PropertyName = In##PropertyName; }
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnListDataModifiedDelegate, UGBListDataObject_Base*, EGBOptionsListDataModifyReason);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FGBOnListDataModifiedDelegate, UGBListDataObject_Base*, EGBOptionsListDataModifyReason);
 
 UCLASS(Abstract)
 class GREEDBOUND_API UGBListDataObject_Base : public UObject
@@ -53,8 +53,8 @@ protected:
     virtual void                            OnEditDependencyDataModified(UGBListDataObject_Base* ModifiedDependencyData, EGBOptionsListDataModifyReason ModifyReason);
 
 public:
-    FOnListDataModifiedDelegate             OnListDataModified;
-    FOnListDataModifiedDelegate             OnDependencyDataModified;
+    FGBOnListDataModifiedDelegate           OnListDataModified;
+    FGBOnListDataModifiedDelegate           OnDependencyDataModified;
 
 private:
     FName                                   DataID;

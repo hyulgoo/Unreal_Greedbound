@@ -1,8 +1,7 @@
 ﻿#include "BTService_CheckAttackRange.h"
-#include "BehaviorTree/BlackboardComponent.h"
 #include "AIController.h"
-#include "Interface/GBCharacterCombatInterface.h"
-#include "Define/GBDefine.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Interface/GBCombatInterface.h"
 
 UBTService_CheckAttackRange::UBTService_CheckAttackRange()
 {
@@ -18,19 +17,26 @@ void UBTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp, ui
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
     APawn* Pawn = OwnerComp.GetAIOwner()->GetPawn();
-    GB_NULL_CHECK_WITHOUT_LOG(Pawn);
+    if (Pawn == nullptr)
+    {
+        return;
+    }
 
     UBlackboardComponent* BBComp = OwnerComp.GetBlackboardComponent();
     AActor* Target = Cast<AActor>(BBComp->GetValueAsObject(TargetKey.SelectedKeyName));
-    GB_NULL_CHECK_WITHOUT_LOG(Target);
+    if (Target == nullptr)
+    {
+        return;
+    }
 
-    IGBCharacterCombatInterface* CombatInterface = Cast<IGBCharacterCombatInterface>(Pawn);
-    GB_NULL_CHECK_WITHOUT_LOG(CombatInterface);
+    TScriptInterface<IGBCombatInterface> CombatInterface = Pawn;
+    if (CombatInterface)
+    {
+        // CombatData 삭제로 임시로 하드코딩
+        const float AttackRange = 150.f;
+        const float DistSqr = FVector::DistSquared(Pawn->GetActorLocation(), Target->GetActorLocation());
+        const bool  bInRange = DistSqr <= FMath::Square(AttackRange);
 
-    // CombatData 삭제로 임시로 하드코딩
-    const float AttackRange = 150.f;
-    const float    DistSqr = FVector::DistSquared(Pawn->GetActorLocation(), Target->GetActorLocation());
-    const bool bInRange = DistSqr <= FMath::Square(AttackRange);
-
-    BBComp->SetValueAsBool(IsInAttackRangeKey.SelectedKeyName, bInRange);
+        BBComp->SetValueAsBool(IsInAttackRangeKey.SelectedKeyName, bInRange);
+    }
 }

@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
-#include "GameplayTagContainer.h"
 #include "GBAbilitySystemComponent.generated.h"
 
 class UGBInputData;
 class UGBAttributeData;
+struct FGameplayTagContainer;
 enum class EGBTriggerType : uint8;
 
 UCLASS()
@@ -25,10 +25,10 @@ public:
     void                            SetInputData(UGBInputData* NewInputData);
 
     const FGameplayTagContainer&    GetActivationOwnedTags(UGameplayAbility* Ability) const;
-    EGBTriggerType                  GetAbilityTriggerTypeByTag(FGameplayTag AssetTag) const;
-    void                            GetAbilitySpecsByTag(FGameplayTag AssetTag, TArray<FGameplayAbilitySpec*>& Outlist);
-    void                            GetGameplayEffectDurationByTag(FGameplayTag EffectTag, float& OutRemainingTime, float& OutTotalDuration);
-    void                            GetAbilityCoolTimeByTag(FGameplayTag AssetTag, float& OutRemainingTime, float& OutTotalDuration);
+    EGBTriggerType                  GetAbilityTriggerTypeByAssetTag(FGameplayTag AssetTag) const;
+    void                            GetAbilitySpecsByAssetTag(FGameplayTag AssetTag, TArray<FGameplayAbilitySpec*>& Outlist);
+    void                            GetGameplayEffectDurationByAssetTag(FGameplayTag EffectTag, float& OutRemainingTime, float& OutTotalDuration);
+    void                            GetAbilityCoolTimeByAssetTag(FGameplayTag AssetTag, float& OutRemainingTime, float& OutTotalDuration);
 
     void                            InitAttributeStats(UGBAttributeData* AttributeInfo);
     

@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "UI\InGame\GBActivatableBaseWidget.h"
-#include "GameplayTagContainer.h"
 #include "Input/UIActionBindingHandle.h"
+#include "GameplayTagContainer.h"
 #include "GBPrimaryLayoutWidget.generated.h"
 
 class UCommonActivatableWidgetContainerBase;
 class UAbilitySystemComponent;
-class UTexture2D;
 class UGBPlayerHUDWidget;
+class UGBInventoryScreenWidget;
 
 UCLASS(Abstract, BlueprintType, meta = (DisableNaiveTick))
 class GREEDBOUND_API UGBPrimaryLayoutWidget : public UGBActivatableBaseWidget
@@ -29,7 +29,10 @@ protected:
 
 private:
     virtual TOptional<FUIInputConfig>       GetDesiredInputConfig() const override final;
+    virtual void                            NativeOnInitialized() override final;
     virtual bool                            NativeOnHandleBackAction() override final;
+
+    void                                    OnInventoryActionTriggered();
 
     FGameplayTag                            GetSkillTagByIndex(uint8 Index) const;
 
@@ -37,8 +40,8 @@ private:
     UPROPERTY(Transient)
     TMap<FGameplayTag, TObjectPtr<UCommonActivatableWidgetContainerBase>>   RegisteredWidgetStackMap;
 
-    UPROPERTY(Transient)
-    TObjectPtr<UAbilitySystemComponent>     AbilitySystemComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "PrimaryLayout", meta = (RowType = "/Script/CommonUI.CommonInputActionDataBase"))
+    FDataTableRowHandle                     InventoryAction;
 
     UPROPERTY(Transient)
     TObjectPtr<UGBPlayerHUDWidget>          HUDWidget;

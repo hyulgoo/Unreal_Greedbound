@@ -9,6 +9,8 @@
 #define GBCOLLISIONCHANNEL_PLAYERMESHTRACE  ECC_GameTraceChannel5
 #define GBCOLLISIONCHANNEL_PLAYERAOE        ECC_GameTraceChannel7
 #define GBCOLLISIONCHANNEL_MONSTERAOE       ECC_GameTraceChannel8
+#define GBCOLLISIONCHANNEL_ITEM             ECC_GameTraceChannel6
+#define GBCOLLISIONCHANNEL_PLAYERINTERACT   ECC_GameTraceChannel9
 
 #define GBCOLLISION_PROFILE_RAGDOLL         FName("Ragdoll")
 #define GBCOLLISION_PROFILE_BLOCKALL        FName("BlockAll")

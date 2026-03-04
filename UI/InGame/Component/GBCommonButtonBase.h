@@ -6,6 +6,8 @@
 #include "CommonButtonBase.h"
 #include "GBCommonButtonBase.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FGBOnItemAction, UGBCommonButtonBase* ClickedButton);
+
 class UCommonTextBlock;
 class UCommonLazyImage;
 
@@ -25,10 +27,16 @@ public:
     void                            SetButtonDisplayImage(const FSlateBrush& InBrush);
 
 private:
+    virtual void                    NativeOnInitialized() override final;
     virtual void                    NativePreConstruct() override final;
     virtual void                    NativeOnCurrentTextStyleChanged() override final;
     virtual void                    NativeOnHovered() override final;
     virtual void                    NativeOnUnhovered() override final;
+
+    void                            OnItemActionTrigger();
+
+public:
+    FGBOnItemAction                   OnItemAction;
 
 private:
     UPROPERTY(meta = (BindWidgetOptional))
@@ -45,4 +53,9 @@ private:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GB UI Button", meta = (AllowPrivateAccess = "true"))
     FText                           ButtonDiscriptionText;
+
+    UPROPERTY(EditDefaultsOnly, Category = "PrimaryLayout", meta = (RowType = "/Script/CommonUI.CommonInputActionDataBase"))
+    FDataTableRowHandle             ItemAction;
+
+    FUIActionBindingHandle          ItemActionHandle;
 };

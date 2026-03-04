@@ -10,7 +10,7 @@ void UGBMapSelectionSubsystem::SetMapCatalog(TSoftObjectPtr<UGBGameMapCatalogDat
     // const EGBMapType Old = CurrentMapType;
     MapCatalogRef = InCatalog;
 
-    GB_LOG(TEXT("SetMapCatalog Called!"));
+    GB_BACKEND_LOG(Warning, TEXT("SetMapCatalog Called!"));
 
     const UGBGameMapCatalogData* Catalog = MapCatalogRef.LoadSynchronous();
 
@@ -21,7 +21,7 @@ void UGBMapSelectionSubsystem::SetMapCatalog(TSoftObjectPtr<UGBGameMapCatalogDat
 
     else
     {
-        GB_LOG(TEXT("SetMapCatalog In Catalog Failed!"));
+        GB_BACKEND_LOG(Warning, TEXT("SetMapCatalog In Catalog Failed!"));
     }
 
     // default맵 설정됨에따라 UI반영위한 Delegate만들 수도 있을 것.. 
@@ -29,7 +29,7 @@ void UGBMapSelectionSubsystem::SetMapCatalog(TSoftObjectPtr<UGBGameMapCatalogDat
 
 void UGBMapSelectionSubsystem::LogAvailableMaps() const
 {
-    UE_LOG(LogTemp, Warning, TEXT("==== [AvailableMaps Dump] (%d entries) ===="), AvailableMaps.Num());
+    GB_BACKEND_LOG(Warning, TEXT("==== [AvailableMaps Dump] (%d entries) ===="), AvailableMaps.Num());
 
     for (const TPair<EGBGameMapType, FGBGameMapInfo>& KV : AvailableMaps)
     {

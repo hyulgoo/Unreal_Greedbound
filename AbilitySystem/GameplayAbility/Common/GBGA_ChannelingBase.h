@@ -76,7 +76,6 @@ protected:
     UPROPERTY()
     TObjectPtr<UGBAT_WaitChanneling>            ActiveChannelTask;
 
-
     // Channeling 설정 값들 (BP에서 수정 가능)
 
     // 채널링 유지 시간(초)

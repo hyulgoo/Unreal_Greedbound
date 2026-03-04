@@ -3,16 +3,16 @@
 #include "GBOptionsScreenWidget.h"
 #include "Input/CommonUIInputTypes.h"
 #include "ICommonInputModule.h"
-#include "Define/GBDefine.h"
-#include "Options/GBOptionsDataRegistry.h"
-#include "Options/DataObjects/GBListDataObject_Collection.h"
-#include "Component/GBTabListWidgetBase.h"
-#include "Component/GBCommonListView.h"
 #include "ProjectSetting/GBGameUserSettings.h"
-#include "Options/ListEntries/GBListEntryWidget_Base.h"
-#include "Options/GBOptionsDetailsViewWidget.h"
 #include "Subsystem/UI/GBUISubsystem.h"
-#include "Component/GBCommonButtonBase.h"
+#include "Define/GBDefine.h"
+#include "UI/InGame/Component/GBTabListWidgetBase.h"
+#include "UI/InGame/Component/GBCommonListView.h"
+#include "UI/InGame/Component/GBCommonButtonBase.h"
+#include "UI/InGame/Options/GBOptionsDataRegistry.h"
+#include "UI/InGame/Options/DataObjects/GBListDataObject_Collection.h"
+#include "UI/InGame/Options/ListEntries/GBListEntryWidget_Base.h"
+#include "UI/InGame/Options/GBOptionsDetailsViewWidget.h"
 
 void UGBOptionsScreenWidget::NativeOnInitialized()
 {
@@ -33,7 +33,7 @@ void UGBOptionsScreenWidget::NativeOnInitialized()
         FBindUIActionArgs(
             ICommonInputModule::GetSettings().GetDefaultBackAction(),
             true,
-            FSimpleDelegate::CreateUObject(this, &UGBOptionsScreenWidget::OnBackBoundActionTriggered)
+            FSimpleDelegate::CreateUObject(this, &UCommonActivatableWidget::DeactivateWidget)
         )
     );
 
@@ -129,11 +129,6 @@ void UGBOptionsScreenWidget::OnResetBoundActionTriggered()
             bIsResettingData = false;
         }
     );
-}
-
-void UGBOptionsScreenWidget::OnBackBoundActionTriggered()
-{
-    DeactivateWidget();
 }
 
 UGBOptionsDataRegistry* UGBOptionsScreenWidget::GetOrCreateDataRegistry()

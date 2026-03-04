@@ -2,7 +2,6 @@
 
 #include "GBActivatableBaseWidget.h"
 #include "GameFramework/PlayerController.h"
-#include "Input/CommonUIInputTypes.h"
 
 APlayerController* UGBActivatableBaseWidget::GetOwningPlayerController()
 {
@@ -11,7 +10,7 @@ APlayerController* UGBActivatableBaseWidget::GetOwningPlayerController()
         CachedOwningPC = GetOwningPlayer<APlayerController>();
     }
 
-    return CachedOwningPC.IsValid() ? CachedOwningPC.Get() : nullptr;
+    return CachedOwningPC.Get();
 }
 
 TOptional<FUIInputConfig> UGBActivatableBaseWidget::GetDesiredInputConfig() const

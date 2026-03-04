@@ -94,10 +94,6 @@ public:
     TSoftObjectPtr<UGBAttributeData>                AttributeInfo;
     
     // 해당 태그를 설정하면 PrimaryAssetId로 사용됨
-    UPROPERTY(EditDefaultsOnly, meta = (Categories = "AssetType"))
-    FGameplayTag                                    AssetTypeTag;
-
-    // 해당 태그를 설정하면 PrimaryAssetId로 사용됨
     UPROPERTY(EditDefaultsOnly, meta = (Categories = "Character"))
     FGameplayTag                                    CharacterTag;
 };

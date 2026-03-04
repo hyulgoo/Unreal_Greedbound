@@ -12,7 +12,7 @@ void UGBGameInstance::Init()
 {
     Super::Init();
 
-    GB_LOG(TEXT("GBGameInstance Init Called"));
+    GB_BACKEND_LOG(Warning, TEXT("GBGameInstance Init Called"));
 
     FCoreUObjectDelegates::PostLoadMapWithWorld.AddUObject(this, &ThisClass::OnPostLoadMap);
 
@@ -25,7 +25,7 @@ void UGBGameInstance::Init()
 
     if (UGBMapSelectionSubsystem* MapSelectionSubsystem = GetSubsystem<UGBMapSelectionSubsystem>())
     {
-        GB_LOG(TEXT("GBGameInstance - SetMapCatalog Called!"));
+        GB_BACKEND_LOG(Warning, TEXT("GBGameInstance - SetMapCatalog Called!"));
         MapSelectionSubsystem->SetMapCatalog(MapCatalogData);
     }
 

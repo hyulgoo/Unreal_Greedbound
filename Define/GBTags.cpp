@@ -8,7 +8,10 @@ namespace GBTag
     UE_DEFINE_GAMEPLAY_TAG(Block_Input,							"Block.Input");
     UE_DEFINE_GAMEPLAY_TAG(Block_Move,							"Block.Move");
 
-    UE_DEFINE_GAMEPLAY_TAG(State_EquipState_Equipped,			"State.EquipState.Equipped");
+    UE_DEFINE_GAMEPLAY_TAG(State_Combat,        			    "State.Combat");
+    UE_DEFINE_GAMEPLAY_TAG(State_Combat_Equipped,			    "State.Combat.Equipped");
+    UE_DEFINE_GAMEPLAY_TAG(State_Combat_Attack,			        "State.Combat.Attack");
+    UE_DEFINE_GAMEPLAY_TAG(State_Combat_Dead,                   "State.Combat.Dead");
     UE_DEFINE_GAMEPLAY_TAG(State_Movement_Sprint,				"State.Movement.Sprint");
     UE_DEFINE_GAMEPLAY_TAG(State_Movement_Crouch,				"State.Movement.Crouch");
 
@@ -37,8 +40,6 @@ namespace GBTag
     UE_DEFINE_GAMEPLAY_TAG(State_Cooldown_Skill03,				"State.Cooldown.Skill03");
     UE_DEFINE_GAMEPLAY_TAG(State_Cooldown_Skill04,				"State.Cooldown.Skill04");
 
-    UE_DEFINE_GAMEPLAY_TAG(State_Dead,							"State.Dead");
-
     UE_DEFINE_GAMEPLAY_TAG(Attribute_Health,					"Attribute.Health");
     UE_DEFINE_GAMEPLAY_TAG(Attribute_Speed,						"Attribute.Speed");
     UE_DEFINE_GAMEPLAY_TAG(Attribute_Combat,					"Attribute.Combat");
@@ -56,7 +57,10 @@ namespace GBTag
     UE_DEFINE_GAMEPLAY_TAG(Event_Common_TrailAttackBegin,		"Event.Common.TrailAttackBegin");
     UE_DEFINE_GAMEPLAY_TAG(Event_Common_TrailAttackEnd,			"Event.Common.TrailAttackEnd");
     UE_DEFINE_GAMEPLAY_TAG(Event_Common_ComboCheck,				"Event.Common.ComboCheck");
-    UE_DEFINE_GAMEPLAY_TAG(Event_Common_Ragdoll,				"Event.Common.Ragdoll");
+    UE_DEFINE_GAMEPLAY_TAG(Event_Common_Ragdoll,                "Event.Common.Ragdoll");
+    UE_DEFINE_GAMEPLAY_TAG(Event_Common_Crouch,                 "Event.Common.Crouch");
+    UE_DEFINE_GAMEPLAY_TAG(Event_Common_Jump,                   "Event.Common.Jump");
+    UE_DEFINE_GAMEPLAY_TAG(Event_Common_PlayMontage,            "Event.Common.PlayMontage");
 
     UE_DEFINE_GAMEPLAY_TAG(Trigger,								"Trigger");
     UE_DEFINE_GAMEPLAY_TAG(Trigger_Common,						"Trigger.Common");
@@ -71,8 +75,8 @@ namespace GBTag
     UE_DEFINE_GAMEPLAY_TAG(Trigger_Common_Attack,         		"Trigger.Common.Attack");
     UE_DEFINE_GAMEPLAY_TAG(Trigger_Common_Primary,				"Trigger.Common.Primary");
     UE_DEFINE_GAMEPLAY_TAG(Trigger_Common_Secondary,			"Trigger.Common.Secondary");
-    UE_DEFINE_GAMEPLAY_TAG(Event_Common_Crouch,					"Trigger.Common.Crouch");
-    UE_DEFINE_GAMEPLAY_TAG(Event_Common_Jump,					"Trigger.Common.Jump");
+    UE_DEFINE_GAMEPLAY_TAG(Trigger_Common_Crouch,				"Trigger.Common.Crouch");
+    UE_DEFINE_GAMEPLAY_TAG(Trigger_Common_Jump,					"Trigger.Common.Jump");
 
     UE_DEFINE_GAMEPLAY_TAG(Trigger_Knight,						"Trigger.Knight");
     UE_DEFINE_GAMEPLAY_TAG(Trigger_Knight_CastBuff,				"Trigger.Knight.CastBuff");

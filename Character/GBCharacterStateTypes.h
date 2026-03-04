@@ -5,7 +5,6 @@ enum class EGBStanceState : uint8
 {
     Stand,
     Crouch,
-    Count
 };
 
 UENUM(BlueprintType)
@@ -13,7 +12,6 @@ enum class EGBStopState : uint8
 {
     Stop,
     Move,
-    Count
 };
 
 UENUM(BlueprintType)
@@ -21,7 +19,6 @@ enum class EGBMoveState : uint8
 {
     Walk,
     Sprint,
-    Count
 };
 
 UENUM(BlueprintType)

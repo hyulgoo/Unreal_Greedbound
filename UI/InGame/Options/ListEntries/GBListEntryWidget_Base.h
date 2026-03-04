@@ -38,7 +38,7 @@ protected:
     virtual void                        OnOwingListDataObjectSet(UGBListDataObject_Base* InOwningListDataObject);
 
     // 파생클래스의 경우 데이터 수정 시 동작 별도 구현 필요 Super:: 호출x
-    virtual void                        OnOwningListDataObjectModified(UGBListDataObject_Base* InListDataObject, EGBOptionsListDataModifyReason ModifyReason);
+    virtual void                        OnOwningListDataObjectModified(UGBListDataObject_Base* InListDataObject, EGBOptionsListDataModifyReason ModifyReason) {};
     virtual void                        OnOwningDependencyDataObjectModified(UGBListDataObject_Base* InDependencyDataObject, EGBOptionsListDataModifyReason ModifyReason);
 
     // 소유한 위젯의 편집가능 상태 수정

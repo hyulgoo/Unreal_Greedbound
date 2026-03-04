@@ -42,6 +42,8 @@ void UGBAssetLoadSubsystem::LoadCharacterDataByAssetId(const FPrimaryAssetId& As
     GB_NULL_CHECK(AbilityData);
 
     const TArray<FGameplayAbilitySpec>& Specs = AbilityData->GetAbilitySpecs();
+    GB_CONDITION_CHECK(Specs.IsEmpty() == false);
+
     for (const FGameplayAbilitySpec& Spec : Specs)
     {
         GBASC->GiveAbility(Spec);

@@ -9,6 +9,7 @@
 
 class UAnimMontage;
 class UGBAT_PlayMontageAndWaitForEvent;
+class UGBCombatComponent;
 
 UCLASS()
 class GREEDBOUND_API UGBGA_ComboAttack : public UGBGA_Base
@@ -23,7 +24,7 @@ public:
 
 protected:
     FName                                           GetNextSectionNameByIndex();
-    void                                            SetShouldNextCombo(const bool bTrigger);
+    void                                            SetContinueCombo(const bool bTrigger);
     void                                            RotateCharacterToControllerRotation();
 
     UFUNCTION()
@@ -39,6 +40,9 @@ private:
     float                                           GetHitDirectionToFloat(const FHitResult& Hit);
 
 protected:
+    UPROPERTY(Transient)
+    TObjectPtr<UGBCombatComponent>                  CombatComponent;
+    
     UPROPERTY(EditDefaultsOnly)
     TSubclassOf<UGameplayEffect>                    DamageGameplayEffect;
 
@@ -48,10 +52,10 @@ protected:
     UPROPERTY(EditDefaultsOnly)
     TObjectPtr<UAnimMontage>                        ComboAttackMontage;
 
-    FGameplayTagContainer                           EventTags;
+    FGameplayTagContainer                           EventReceiveTags;
 
-    int32                                           CurrentComboIndex               = 0;
+    int32                                           CurrentComboIndex           = 0;
 
-    uint8                                           bShoudTriggerNextCombo : 1      = false;
-    uint8                                           bShouldRotateNextComboStart: 1  = true;
+    bool                                            bContinueCombo              = false;
+    bool                                            bShouldRotateNextComboStart = true;
 };

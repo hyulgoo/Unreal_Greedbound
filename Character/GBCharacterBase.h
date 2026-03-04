@@ -5,24 +5,18 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
-#include "Interface/GBCharacterMovementInterface.h"
-#include "Interface/GBCharacterCombatInterface.h"
-#include "GameplayTagContainer.h"
-#include "Define/GBCollision.h"
+#include "Interface/GBCombatInterface.h"
+#include "Interface/GBMovementInterface.h"
 #include "GBCharacterBase.generated.h"
 
-class UGameplayAbility;
 class UAbilitySystemComponent;
 class UGBAbilitySystemComponent;
 class UGBMovementStateComponent;
 class UGBCombatComponent;
-class UGBCombatData;
-class UGameplayEffect;
-struct FGameplayAbilitySpec;
 struct FGameplayEventData;
 
-UCLASS()
-class GREEDBOUND_API AGBCharacterBase : public ACharacter, public IAbilitySystemInterface, public IGBCharacterCombatInterface, public IGBCharacterMovementInterface
+UCLASS(Abstract)
+class GREEDBOUND_API AGBCharacterBase : public ACharacter, public IAbilitySystemInterface, public IGBCombatInterface, public IGBMovementInterface
 {
     GENERATED_BODY()
 
@@ -36,47 +30,24 @@ protected:
 
     virtual UAbilitySystemComponent*        GetAbilitySystemComponent() const override final;
 
-    template < typename T >
+    template <typename T>
     T* GetAbilitySystemComponent() const { return Cast<T>(GetAbilitySystemComponent()); }
 
-    virtual void                            SetAbilitySystemComponent(UGBAbilitySystemComponent* ASC);
+    void                                    SetAbilitySystemComponent(UGBAbilitySystemComponent* ASC);
     void                                    InitAbilitySystemComponent(AActor* OwnerActor);
 
-    UGBMovementStateComponent*              GetMovementStateComponent() const;
+    // IGBCombatInterface
+    virtual UGBCombatComponent*             GetCombatComponent_Implementation() const override { return CombatComponent; }
 
-    bool                                    IsPlayingMontage(UAnimMontage* Montage);
-
-    // CharacterMovementInterface
-    virtual void                            SetCharacterStanceState(const EGBStanceState NewState) override final;
-    virtual void                            SetCharacterStopState(const EGBStopState NewState) override;
-    virtual void                            SetCharacterMoveState(const EGBMoveState NewState) override final;
-    virtual EGBStanceState                  GetCharacterStanceState() const override final;
-    virtual EGBStopState                    GetCharacterStopState() const override final;
-    virtual EGBMoveState                    GetCharacterMoveState() const override final;
-    virtual float                           GetCrouchSpeedCoefficient() const final;
-    virtual float                           GetBaseWalkSpeed() const final;
-    virtual float                           GetBaseSprintSpeed() const final;
-
-    void                                    UpdateSpeed();
-
-    // IGBCharacterCombatInterface
-    virtual void                            SetCombatState(const EGBCombatState NewState) override final;
-    virtual EGBCombatState                  GetCombatState() const override final;
-    virtual void                            BeRagdoll() override final;
-    virtual void                            EquipWeapon(AGBWeapon* NewWeapon) override final;
-    virtual UStaticMeshComponent*           GetWeaponMesh() const override;
-
-    void                                    OnSprintEndEventRecieved(const FGameplayEventData* Payload);
-    void                                    OnAttackEventRecieved(const FGameplayEventData* Payload);
-    virtual void                            OnMovementStateTagChanged(const FGameplayTag Tag, const int32 Count);
-
-    virtual FName                           GetAttackProfile() const { return GBCOLLISION_PROFILE_BLOCKALL; }
+    // IGBMovementInterface
+    virtual UGBMovementStateComponent*      GetMovementStateComponent_Implementation() const override { return MovementStateComponent; }
+    virtual void                            SetRagdoll_Implementation(bool bRagdoll) override;
 
     virtual void                            LoadCharacterData();
 
 private:
     UFUNCTION(NetMulticast, Reliable)
-    void                                    Multicast_BeRagdoll();
+    void                                    Multicast_BeRagdoll(bool bActive);
 
 private:
     UPROPERTY(Transient)

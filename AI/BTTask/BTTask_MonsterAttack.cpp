@@ -3,7 +3,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystem/GBGameplayAbilityHelper.h"
+#include "AbilitySystem/GBAbilitySystemHelper.h"
 #include "Define/GBTags.h"
 #include "Define/GBDefine.h"
 #include "Interface/GAS/GBEndAbilityBindInterface.h"
@@ -37,7 +37,7 @@ EBTNodeResult::Type UBTTask_MonsterAttack::ExecuteTask(UBehaviorTreeComponent& O
     GB_NULL_CHECK_WITH_RETURN(ASC, EBTNodeResult::Failed);
 
     TArray<FGameplayAbilitySpec*> Specs;
-    FGBGameplayAbilityHelper::GetAbilitySpecsByTag(ASC, GBTag::Trigger_Common_Primary, Specs);
+    FGBAbilitySystemHelper::GetAbilitySpecsByTag(ASC, GBTag::Trigger_Common_Primary, Specs);
     GB_CONDITION_CHECK_WITH_RETURN(Specs.Num() > 0, EBTNodeResult::Failed);
 
     for (FGameplayAbilitySpec* Spec : Specs)
@@ -61,7 +61,7 @@ EBTNodeResult::Type UBTTask_MonsterAttack::ExecuteTask(UBehaviorTreeComponent& O
         }
     }
 
-    FGBGameplayAbilityHelper::SendGameplayEventToSelf(GBTag::Trigger_Common_Primary, ASC);
+    FGBAbilitySystemHelper::SendGameplayEventToSelf(GBTag::Trigger_Common_Primary, Pawn);
 
     return EBTNodeResult::InProgress;
 }

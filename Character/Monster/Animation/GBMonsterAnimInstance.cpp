@@ -3,60 +3,41 @@
 #include "GBMonsterAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Interface/GBCharacterMovementInterface.h"
+#include "Interface/GBMovementInterface.h"
 #include "Define/GBDefine.h"
+#include "Components/GBMovementStateComponent.h"
 
-void UGBMonsterAnimInstance::NativeInitializeAnimation()
+void UGBMonsterAnimInstance::NativeBeginPlay()
 {
-    Super::NativeInitializeAnimation();
+    Owner = Cast<ACharacter>(TryGetPawnOwner());
+    GB_NULL_CHECK(Owner);
 
-    FTimerDelegate BaseSpeedDelegate;
-    BaseSpeedDelegate.BindUObject(this, &UGBMonsterAnimInstance::InitBaseSpeed);
-    GetWorld()->GetTimerManager().SetTimer(SetBaseSpeedTimer, BaseSpeedDelegate, 1.f, false);
+    Movement = Owner->GetCharacterMovement();
+
+    TScriptInterface<IGBMovementInterface> MovementInterface = Owner;
+    GB_NULL_CHECK(MovementInterface);
+
+    MovementState = MovementInterface->GetMovementStateComponent();
 }
 
 void UGBMonsterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
     Super::NativeUpdateAnimation(DeltaSeconds);
 
-    GB_VALID_CHECK_WITHOUT_LOG(Movement);
-
-    TScriptInterface<IGBCharacterMovementInterface> CharacterMovementInterface = Owner;
-    GB_NULL_CHECK(CharacterMovementInterface);
-
-    StanceStateType = CharacterMovementInterface->GetCharacterStanceState();
-    StopStateType = CharacterMovementInterface->GetCharacterStopState();
-    MoveStateType = CharacterMovementInterface->GetCharacterMoveState();
+    if (Movement == nullptr || MovementState == nullptr)
+    {
+        return;
+    }
 
     Velocity = Movement->Velocity;
     GroundSpeed = Velocity.Size2D();
     bIsFalling = Movement->IsFalling();
 
-    FVector NormalizedVelocity = Movement->Velocity.GetSafeNormal();
+    StanceState = MovementState->GetStanceState();
+    StopState = GroundSpeed >= GBMovementConstants::MoveThreshold ? EGBStopState::Move : EGBStopState::Stop;
+    MoveState = MovementState->GetMoveState();
+
+    FVector NormalizedVelocity = Velocity.GetSafeNormal();
     Forward = NormalizedVelocity.Dot(Owner->GetActorForwardVector());
     Strafe = NormalizedVelocity.Dot(Owner->GetActorRightVector());
-}
-
-void UGBMonsterAnimInstance::InitBaseSpeed()
-{
-    Owner = Cast<ACharacter>(TryGetPawnOwner());
-    if (Owner)
-    {
-        Movement = Owner->GetCharacterMovement();
-
-        TScriptInterface<IGBCharacterMovementInterface>  CharacterMovementInterface = Owner;
-        if (CharacterMovementInterface)
-        {
-            BaseWalkSpeed = CharacterMovementInterface->GetBaseWalkSpeed();
-            BaseSprintSpeed = CharacterMovementInterface->GetBaseSprintSpeed();
-        }
-    }
-
-    if (BaseWalkSpeed <= 1.f || BaseSprintSpeed <= 1.f)
-    {
-        FTimerDelegate BaseSpeedDelegate;
-        BaseSpeedDelegate.BindUObject(this, &UGBMonsterAnimInstance::InitBaseSpeed);
-        GetWorld()->GetTimerManager().SetTimer(SetBaseSpeedTimer, BaseSpeedDelegate, 1.f, false);
-    }
 }

@@ -30,15 +30,14 @@ class GREEDBOUND_API UGBUISubsystem : public UGameInstanceSubsystem
 
 public:
     static UGBUISubsystem*                  Get(const UObject* WorldContextObject);
-
     virtual bool                            ShouldCreateSubsystem(UObject* Outer) const override final;
-
-    UFUNCTION(BlueprintCallable)
-    void                                    RegisterCreatedPrimaryLayoutWidget(UGBPrimaryLayoutWidget* InCreatedWidget);
 
     void                                    PushSoftWidgetToStackAynsc(const FGameplayTag& InWidgetStackTag, TSoftClassPtr<UGBActivatableBaseWidget> InSoftWidgetClass, TFunction<void(EGBAsyncPushWidgetState, UGBActivatableBaseWidget*)> AsyncPushStateCallback);
     void                                    PushConfirmScreenToModalStackAynsc(EGBConfirmScreenType InScreenType, const FText& InScreenTitle, const FText& InScreenMessage, TFunction<void(EGBConfirmScreenButtonType)> ButtonClikedCallback);
     
+    UFUNCTION(BlueprintCallable)
+    void                                    RegisterCreatedPrimaryLayoutWidget(UGBPrimaryLayoutWidget* InCreatedWidget);
+
     UFUNCTION(BlueprintCallable)
     void                                    SetHUDWidget(UAbilitySystemComponent* ASC);
 

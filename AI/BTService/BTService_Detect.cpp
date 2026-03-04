@@ -24,14 +24,14 @@ void UBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
     Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
     APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
-    GB_NULL_CHECK_WITHOUT_LOG(ControllingPawn);
+    GB_NULL_CHECK(ControllingPawn);
 
     FVector Center = ControllingPawn->GetActorLocation();
-    UWorld* World = ControllingPawn->GetWorld();;
-    GB_NULL_CHECK_WITHOUT_LOG(World);
+    UWorld* World = ControllingPawn->GetWorld();
+    GB_VALID_CHECK(World);
 
     TScriptInterface<IGBMonsterBaseInterface> MonsterBaseInterface = ControllingPawn;
-    GB_NULL_CHECK_WITHOUT_LOG(MonsterBaseInterface);
+    GB_NULL_CHECK(MonsterBaseInterface);
 
     const FMonsterPerceptionData& PerceptionData = MonsterBaseInterface->GetMonsterBaseData()->PerceptionData;
 

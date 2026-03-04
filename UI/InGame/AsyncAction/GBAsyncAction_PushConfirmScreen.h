@@ -8,7 +8,7 @@
 
 enum class EGBConfirmScreenType : uint8;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnConfirmScreenButtonClickedDelegate, EGBConfirmScreenButtonType, ClickedButtonType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGBOnConfirmScreenButtonClickedDelegate, EGBConfirmScreenButtonType, ClickedButtonType);
 
 UCLASS()
 class GREEDBOUND_API UGBAsyncAction_PushConfirmScreen : public UBlueprintAsyncActionBase
@@ -26,7 +26,7 @@ public:
 
 public:
     UPROPERTY(BlueprintAssignable)
-    FOnConfirmScreenButtonClickedDelegate       OnButtonClicked;
+    FGBOnConfirmScreenButtonClickedDelegate     OnButtonClicked;
 
 private:
     TWeakObjectPtr<UWorld>                      CachedWorld;

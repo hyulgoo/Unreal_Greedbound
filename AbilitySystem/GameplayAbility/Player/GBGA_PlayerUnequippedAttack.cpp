@@ -13,11 +13,11 @@ void UGBGA_PlayerUnequippedAttack::InputPressed(const FGameplayAbilitySpecHandle
         if (ASC)
         {
             ASC->ServerSetInputPressed(Handle);
-            SetShouldNextCombo(true);
+            SetContinueCombo(true);
         }
     }
     else if(HasAuthority(&ActivationInfo))
     {
-        SetShouldNextCombo(true);
+        SetContinueCombo(true);
     }
 }

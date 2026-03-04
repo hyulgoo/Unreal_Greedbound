@@ -3,20 +3,17 @@
 #include "GBPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
+#include "Engine/LevelStreaming.h"
 #include "InputMappingContext.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/Player/GBInputComponent.h"
 #include "Components/GBAbilitySystemComponent.h"
 #include "Subsystem/Network/Client/GBClientSessionSubsystem.h"
 #include "Character/Player/GBPlayerState.h"
 #include "Define/GBTags.h"
-#include "Data/GBInputData.h"
 #include "UI/InGame/GBInGameHUD.h"
-#include "AbilitySystem/GBGameplayAbilityHelper.h"
-#include "Game/Dungeon/GBDungeonGameMode.h"
 #include "UI/InGame/GBInGameWaitingWidget.h"
-#include "Blueprint/UserWidget.h"
-#include "Engine/World.h"
-#include "Engine/LevelStreaming.h"
+#include "Game/Dungeon/GBDungeonGameMode.h"
 #include "Game/GBGameState.h"
 
 UGBAbilitySystemComponent* AGBPlayerController::GetAbilitySystemComponent()
@@ -149,7 +146,7 @@ void AGBPlayerController::OnRep_PlayerState()
             AbilitySystemComponent->RegisterGameplayTagEvent(GBTag::Block_Input, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AGBPlayerController::OnBlockTagChanged);
             AbilitySystemComponent->RegisterGameplayTagEvent(GBTag::Block_Move, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AGBPlayerController::OnBlockTagChanged);
 
-            InitializePlayerUI();
+            BP_InitializePlayerUI();
         }
     }
 
@@ -216,28 +213,25 @@ void AGBPlayerController::TryNotifyReadyToPlay()
 
 void AGBPlayerController::AbilityTagTriggered(const FGameplayTag AssetTag)
 {
-    UGBAbilitySystemComponent* GBASC = GetAbilitySystemComponent();
-    if (GBASC)
+    if (GetAbilitySystemComponent())
     {
-        GBASC->AbilityTagTriggered(AssetTag);
+        GetAbilitySystemComponent()->AbilityTagTriggered(AssetTag);
     }
 }
 
 void AGBPlayerController::AbilityTagReleased(const FGameplayTag AssetTag)
 {
-    UGBAbilitySystemComponent* GBASC = GetAbilitySystemComponent();
-    if (GBASC)
+    if (GetAbilitySystemComponent())
     {
-        GBASC->AbilityTagReleased(AssetTag);
+        GetAbilitySystemComponent()->AbilityTagReleased(AssetTag);
     }
 }
 
 void AGBPlayerController::AbilityTagToggled(const FGameplayTag AssetTag)
 {
-    UGBAbilitySystemComponent* GBASC = GetAbilitySystemComponent();
-    if (GBASC)
+    if (GetAbilitySystemComponent())
     {
-        GBASC->AbilityTagToggled(AssetTag);
+        GetAbilitySystemComponent()->AbilityTagToggled(AssetTag);
     }
 }
 
@@ -247,16 +241,18 @@ void AGBPlayerController::OnBlockTagChanged(const FGameplayTag Tag, const int32 
     InputBlockTags.AddTag(GBTag::Block_Input);
     InputBlockTags.AddTag(GBTag::Block_Move);
 
-    UGBAbilitySystemComponent* GBASC = GetAbilitySystemComponent();
-    if (GBASC)
+    if (GetAbilitySystemComponent())
     {
-        bMoveBlock = GBASC->HasAnyMatchingGameplayTags(InputBlockTags);
+        bMoveBlock = GetAbilitySystemComponent()->HasAnyMatchingGameplayTags(InputBlockTags);
     }
 }
 
 void AGBPlayerController::Move(const FInputActionValue& InputActionValue)
 {
-    GB_CONDITION_CHECK_WITHOUT_LOG(!bMoveBlock);
+    if (bMoveBlock)
+    {
+        return;
+    }
 
     const FVector2D InputAxisVector = InputActionValue.Get<FVector2D>();
     const FRotator Rotation = GetControlRotation();
@@ -265,7 +261,7 @@ void AGBPlayerController::Move(const FInputActionValue& InputActionValue)
     const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
     const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-    APawn* ControlledPawn = GetPawn<APawn>();
+    APawn* ControlledPawn = GetPawn();
     if (ControlledPawn)
     {
         ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.Y);

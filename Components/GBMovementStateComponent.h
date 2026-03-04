@@ -8,10 +8,15 @@
 #include "GBMovementStateComponent.generated.h"
 
 class UAnimMontage;
+class UGBAbilitySystemComponent;
+class UCharacterMovementComponent;
+struct FGameplayTag;
+struct FOnAttributeChangeData;
 
 namespace GBMovementConstants
 {
     constexpr float MoveThreshold                   = 1.f;
+    constexpr float JumpingThreshould               = 10.f;
     constexpr float TurnThresholdForAutonomous      = 60.f;
     constexpr float TurnThresholdForSimulatedProxy  = 10.f;
 }
@@ -22,26 +27,33 @@ class GREEDBOUND_API UGBMovementStateComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
-    EGBStanceState              GetCharacterStanceState() const;
-    void                        SetCharacterStanceState(const EGBStanceState NewState);
-    EGBStopState                GetCharacterStopState() const;
-    void                        SetCharacterStopState(const EGBStopState NewState);
-    EGBMoveState                GetCharacterMoveState() const;
-    void                        SetCharacterMoveState(const EGBMoveState NewState);
-    UAnimMontage*               GetTurnInPlaceMontage();
-    void                        SetLastRotation();
-    FRotator                    GetDeltaRotation() const;
-    bool                        IsMovable() const;
-    void                        SetMovable(const bool bMovable);
+    UFUNCTION(BlueprintCallable)
+    EGBStanceState                          GetStanceState() const { return StanceState; } 
 
-protected:
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage")
-    TObjectPtr<UAnimMontage>    TurnInPlaceMontage;
+    UFUNCTION(BlueprintCallable)
+    void                                    SetStanceState(EGBStanceState NewState) { StanceState = NewState; }
+
+    UFUNCTION(BlueprintCallable)
+    EGBMoveState                            GetMoveState() const { return MoveState; }
+
+    UFUNCTION(BlueprintCallable)
+    void                                    SetMoveState(EGBMoveState NewState) { MoveState = NewState; }
+
+    UFUNCTION(BlueprintCallable)
+    UAnimMontage*                           GetTurnInPlaceMontage() const { return TurnInPlaceMontage; }
+
+    void                                    OnCurrentSpeedChanged(const FOnAttributeChangeData& Payload);
 
 private:
-    FRotator                    LastRotation;
-    EGBStanceState              StanceStateType     = EGBStanceState::Stand;
-    EGBStopState                StopStateType       = EGBStopState::Stop;
-    EGBMoveState                MoveStateType       = EGBMoveState::Walk;
-    uint8                       bIsMovable : 1      = true;
+    virtual void                            BeginPlay() override final;
+
+private:
+    UPROPERTY(Transient)
+    TObjectPtr<UCharacterMovementComponent> Movement;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Montage", meta = (AllowPrivateAccess = "true"))
+    TObjectPtr<UAnimMontage>                TurnInPlaceMontage;
+
+    EGBStanceState                          StanceState     = EGBStanceState::Stand;
+    EGBMoveState                            MoveState       = EGBMoveState::Walk;
 };

@@ -3,6 +3,7 @@
 #include "GBCommonButtonBase.h"
 #include "CommonTextBlock.h"
 #include "CommonLazyImage.h"
+#include "Input/CommonUIInputTypes.h"
 #include "Subsystem/UI/GBUISubsystem.h"
 
 void UGBCommonButtonBase::SetButtonText(const FText& InButtonText)
@@ -23,6 +24,22 @@ void UGBCommonButtonBase::SetButtonDisplayImage(const FSlateBrush& InBrush)
     if (CLI_ButtonImage)
     {
         CLI_ButtonImage->SetBrush(InBrush);
+    }
+}
+
+void UGBCommonButtonBase::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+
+    if (ItemAction.IsNull() == false)
+    {
+        ItemActionHandle = RegisterUIActionBinding(
+            FBindUIActionArgs(
+                ItemAction,
+                true,
+                FSimpleDelegate::CreateUObject(this, &UGBCommonButtonBase::OnItemActionTrigger)
+            )
+        );
     }
 }
 
@@ -60,5 +77,13 @@ void UGBCommonButtonBase::NativeOnUnhovered()
     if (ButtonDiscriptionText.IsEmpty() == false)
     {
         UGBUISubsystem::Get(this)->OnButtonDescriptionTextUpdated.Broadcast(this, FText::GetEmpty());
+    }
+}
+
+void UGBCommonButtonBase::OnItemActionTrigger()
+{
+    if (OnItemAction.IsBound())
+    {
+        OnItemAction.Broadcast(this);
     }
 }

@@ -2,78 +2,77 @@
 
 #include "GBGA_ComboAttack.h"
 #include "Define/GBAnimSectionName.h"
-#include "Interface/GBCharacterCombatInterface.h"
 #include "AbilitySystem/AbilityTask/GBAT_PlayMontageAndWaitForEvent.h"
 #include "AbilitySystem/Attribute/GBCombatAttributeSet.h"
 #include "Define/GBDefine.h"
 #include "Define/GBTags.h"
+#include "Interface/GBCombatInterface.h"
+#include "Components/GBCombatComponent.h"
 
 UGBGA_ComboAttack::UGBGA_ComboAttack(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
     : Super(ObjectInitializer)
 {
     InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 
-    EventTags.AddTag(GBTag::Event_Common_ComboCheck);
+    EventReceiveTags.AddTag(GBTag::Event_Common_ComboCheck);
 }
 
 void UGBGA_ComboAttack::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
     Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-    GB_CONDITION_CHECK_WITHOUT_LOG(GetAvatarActorFromActorInfo()->GetLocalRole() >= ROLE_AutonomousProxy);
-
-    TScriptInterface<IGBCharacterCombatInterface> CombatInterface = ActorInfo->AvatarActor.Get();
-    if (CombatInterface)
+    if (GetAvatarActorFromActorInfo()->GetLocalRole() < ROLE_AutonomousProxy)
     {
-        CombatInterface->SetCombatState(EGBCombatState::Attack);
-
-        UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
-        GB_NULL_CHECK(ASC);
-
-        GB_NULL_CHECK(ComboAttackMontage);
-        GB_CONDITION_CHECK(EventTags.IsEmpty() == false);
-
-        if (bShouldRotateNextComboStart)
-        {
-            RotateCharacterToControllerRotation();
-        }
-
-        PlayMontageAndWaitEventTask = UGBAT_PlayMontageAndWaitForEvent::PlayMontageAndWaitForEvent(
-            this,
-            "PlayMontageAndWaitEvent",
-            ComboAttackMontage,
-            EventTags,
-            1.f,
-            GetNextSectionNameByIndex());
-        PlayMontageAndWaitEventTask->OnCompleted.AddDynamic(this, &ThisClass::OnCompleted);
-        PlayMontageAndWaitEventTask->EventReceived.AddDynamic(this, &ThisClass::OnEventReceived);
-        PlayMontageAndWaitEventTask->ReadyForActivation();
+        return;
     }
+
+    if (CombatComponent == nullptr)
+    {
+        CombatComponent = IGBCombatInterface::Execute_GetCombatComponent(GetAvatarActorFromActorInfo());
+    }
+
+    CombatComponent->SetCombatState(EGBCombatState::Attack);
+
+    GB_NULL_CHECK(ComboAttackMontage);
+    GB_CONDITION_CHECK(EventReceiveTags.IsEmpty() == false);
+
+    if (bShouldRotateNextComboStart)
+    {
+        RotateCharacterToControllerRotation();
+    }
+
+    PlayMontageAndWaitEventTask = UGBAT_PlayMontageAndWaitForEvent::PlayMontageAndWaitForEvent(
+        this,
+        "PlayMontageAndWaitEvent",
+        ComboAttackMontage,
+        EventReceiveTags,
+        1.f,
+        GetNextSectionNameByIndex());
+    PlayMontageAndWaitEventTask->OnCompleted.AddDynamic(this, &ThisClass::OnCompleted);
+    PlayMontageAndWaitEventTask->OnEventReceived.AddDynamic(this, &ThisClass::OnEventReceived);
+    PlayMontageAndWaitEventTask->ReadyForActivation();    
 }
 
 void UGBGA_ComboAttack::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
     Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-    TScriptInterface<IGBCharacterCombatInterface> CombatInterface = ActorInfo->AvatarActor.Get();
-    if (CombatInterface)
-    {
-        CombatInterface->SetCombatState(EGBCombatState::Idle);
-    }
+    GB_NULL_CHECK(CombatComponent);
+
+    CombatComponent->SetCombatState(EGBCombatState::Idle);
 
     CurrentComboIndex = 0;
-    bShoudTriggerNextCombo = false;
+    bContinueCombo = false;
 }
 
 FName UGBGA_ComboAttack::GetNextSectionNameByIndex()
 {
-    ++CurrentComboIndex;
-    return FGBAnimSectionNameHelper::GetAttackSectionNameByComboIndex(CurrentComboIndex);
+    return FGBAnimSectionNameHelper::GetAttackSectionNameByComboIndex(CurrentComboIndex++);
 }
 
-void UGBGA_ComboAttack::SetShouldNextCombo(const bool bTrigger)
+void UGBGA_ComboAttack::SetContinueCombo(const bool bTrigger)
 {
-    bShoudTriggerNextCombo = bTrigger;
+    bContinueCombo = bTrigger;
 }
 
 void UGBGA_ComboAttack::RotateCharacterToControllerRotation()
@@ -97,15 +96,19 @@ void UGBGA_ComboAttack::OnEventReceived(const FGameplayTag EventTag, FGameplayEv
 {
     if (EventTag == GBTag::Event_Common_ComboCheck)
     {
-        if (bShoudTriggerNextCombo)
+        if (bContinueCombo == false)
         {
-            bShoudTriggerNextCombo = false;
-            if (bShouldRotateNextComboStart)
-            {
-                RotateCharacterToControllerRotation();
-            }
-            PlayMontageAndWaitEventTask->JumpToSection(GetNextSectionNameByIndex());
+            return;
         }
+
+        bContinueCombo = false;
+
+        if (bShouldRotateNextComboStart)
+        {
+            RotateCharacterToControllerRotation();
+        }
+
+        PlayMontageAndWaitEventTask->JumpToSection(GetNextSectionNameByIndex());
     }
 }
 
@@ -115,14 +118,14 @@ void UGBGA_ComboAttack::OnTargetDataReady(const FGameplayAbilityTargetDataHandle
     GB_NULL_CHECK(ASC);
 
     const UGBCombatAttributeSet* CombatAttributeSet = ASC->GetSet<UGBCombatAttributeSet>();
-    GB_NULL_CHECK_WITHOUT_LOG(CombatAttributeSet);
+    GB_NULL_CHECK(CombatAttributeSet);
 
     const float AttackPoint = CombatAttributeSet->GetAttack();
 
     for (TSharedPtr<FGameplayAbilityTargetData> TargetData : DataHandle.Data)
     {
         FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(DamageGameplayEffect, GetAbilityLevel());
-        GB_CONDITION_CHECK_WITHOUT_LOG(SpecHandle.IsValid());
+        GB_CONDITION_CHECK(SpecHandle.IsValid());
 
         if (TargetData->HasHitResult())
         {

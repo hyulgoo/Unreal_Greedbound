@@ -40,7 +40,7 @@ public:
     FGBPlayMontageAndWaitForEventDelegate   OnCompleted;
     
     UPROPERTY(BlueprintAssignable)
-    FGBPlayMontageAndWaitForEventDelegate   EventReceived;
+    FGBPlayMontageAndWaitForEventDelegate   OnEventReceived;
     
     UPROPERTY()
     TObjectPtr<UAnimMontage>                MontageToPlay;

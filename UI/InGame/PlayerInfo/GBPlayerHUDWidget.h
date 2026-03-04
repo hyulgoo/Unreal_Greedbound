@@ -26,6 +26,7 @@ class UTexture2D;
 class UImage;
 class UProgressBar;
 class UHorizontalBox;
+class UGBAbilitySystemComponent;
 class UAbilitySystemComponent;
 struct FOnAttributeChangeData;
 struct FGameplayEventData;
@@ -58,7 +59,7 @@ private:
 
 private:
     UPROPERTY()
-    TObjectPtr<UAbilitySystemComponent>         AbilitySystemComponent;
+    TObjectPtr<UGBAbilitySystemComponent>       AbilitySystemComponent;
 
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UHorizontalBox>                  HB_Buff;

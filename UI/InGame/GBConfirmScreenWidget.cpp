@@ -5,7 +5,6 @@
 #include "CommonTextBlock.h"
 #include "Components/DynamicEntryBox.h"
 #include "Component/GBCommonButtonBase.h"
-#include "ICommonInputModule.h"
 
 UGBConfirmScreenInfoObject* UGBConfirmScreenInfoObject::CreateOkScreenInfoObject(const FText& InScreenTitle, const FText& InScreenMessage)
 {

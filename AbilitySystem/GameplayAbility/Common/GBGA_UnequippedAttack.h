@@ -7,8 +7,6 @@
 #include "GameplayTagContainer.h"
 #include "GBGA_UnequippedAttack.generated.h"
 
-class UGBCombatData;
-
 UCLASS()
 class GREEDBOUND_API UGBGA_UnequippedAttack : public UGBGA_ComboAttack
 {
@@ -17,9 +15,9 @@ class GREEDBOUND_API UGBGA_UnequippedAttack : public UGBGA_ComboAttack
 public:
     UGBGA_UnequippedAttack(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-    virtual void    OnEventReceived(const FGameplayTag EventTag, FGameplayEventData EventData) override;
+    virtual void OnEventReceived(const FGameplayTag EventTag, FGameplayEventData EventData) override;
 
 public:
     UPROPERTY(EditDefaultsOnly)
-    float           AttackRange = 150.f;
+    float        AttackRange = 150.f;
 };

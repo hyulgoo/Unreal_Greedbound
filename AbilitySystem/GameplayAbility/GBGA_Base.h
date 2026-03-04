@@ -6,6 +6,8 @@
 #include "Abilities/GameplayAbility.h"
 #include "GBGA_Base.generated.h"
 
+enum class EGBTriggerType : uint8;
+
 UCLASS()
 class GREEDBOUND_API UGBGA_Base : public UGameplayAbility
 {
@@ -20,9 +22,14 @@ public:
     virtual void                    InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
 
 protected:
+    EGBTriggerType                  GetTriggerType() const;
+
+    UFUNCTION(BlueprintImplementableEvent)
+    void                            OnInputReleased();
+
     void                            RemoveActiveEffectsByGrantedTag(const FGameplayTagContainer& Tags);
     void                            RemoveActiveEffectsByGrantedTag(const FGameplayTag& Tag);
 
 private:
-    FGameplayTag                    GetTriggerTagByTag() const;
+    FGameplayTag                    GetFirstAssetTag() const;
 };

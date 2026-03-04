@@ -24,7 +24,10 @@ void UGBAT_PlayMontageAndWaitForEvent::Activate()
 
             if (AbilitySystemComponent->PlayMontage(Ability, Ability->GetCurrentActivationInfo(), MontageToPlay, Rate, StartSection) > 0.f)
             {
-                GB_CONDITION_CHECK_WITHOUT_LOG(ShouldBroadcastAbilityTaskDelegates());
+                if (ShouldBroadcastAbilityTaskDelegates() == false)
+                {
+                    return;
+                }
 
                 MontageEndedDelegate.BindUObject(this, &UGBAT_PlayMontageAndWaitForEvent::OnMontageEnded);
                 AnimInstance->Montage_SetEndDelegate(MontageEndedDelegate, MontageToPlay);
@@ -144,6 +147,6 @@ void UGBAT_PlayMontageAndWaitForEvent::OnGameplayEvent(FGameplayTag EventTag, co
         FGameplayEventData TempData = *Payload;
         TempData.EventTag = EventTag;
 
-        EventReceived.Broadcast(EventTag, TempData);
+        OnEventReceived.Broadcast(EventTag, TempData);
     }
 }

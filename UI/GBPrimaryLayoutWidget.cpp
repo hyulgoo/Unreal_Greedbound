@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GBPrimaryLayoutWidget.h"
+#include "Input/CommonUIInputTypes.h"
 #include "Widgets/CommonActivatableWidgetContainer.h"
 #include "Define/GBDefine.h"
 #include "Define/GBTags.h"
@@ -9,7 +10,7 @@
 #include "UI/InGame/AsyncAction/GBAsyncAction_PushSoftWidget.h"
 #include "AbilitySystem/Attribute/GBHealthAttributeSet.h"
 #include "AbilitySystem/Attribute/GBSpeedAttributeSet.h"
-#include "AbilitySystem/GBGameplayAbilityHelper.h"
+#include "AbilitySystem/GameplayAbility/Player/GBGA_PlayerSkill.h"
 
 UCommonActivatableWidgetContainerBase* UGBPrimaryLayoutWidget::FindWidgetStackByTag(const FGameplayTag& InTag) const
 {
@@ -32,59 +33,58 @@ void UGBPrimaryLayoutWidget::SetHUDWidget(UAbilitySystemComponent* InASC)
 {
     GB_NULL_CHECK(InASC);
 
-    AbilitySystemComponent = InASC;
-
     GB_NULL_CHECK(HUDWidgetClass);
 
     HUDWidget = CreateWidget<UGBPlayerHUDWidget>(GetWorld(), HUDWidgetClass);
-    HUDWidget->InitializeAttributeInfo(AbilitySystemComponent); 
+    HUDWidget->InitializeAttributeInfo(InASC);
 
     TArray<TPair<FGameplayTag, UTexture2D*>> SkillIconInfoList;
 
-    TArray<FGameplayAbilitySpec>& Abilities = AbilitySystemComponent->GetActivatableAbilities();
+    TArray<FGameplayAbilitySpec>& Abilities = InASC->GetActivatableAbilities();
     uint8 Skillndex = 1;
+
     for (const FGameplayAbilitySpec& AbilitySpec : Abilities)
     {
-        UTexture2D* IconTexture = FGBGameplayAbilityHelper::GetSkillAbilityIcon(AbilitySpec.Ability);
-        if (IconTexture)
+        UGBGA_PlayerSkill* SkillAbility = Cast<UGBGA_PlayerSkill>(AbilitySpec.Ability);
+        if (SkillAbility)
         {
-            const FGameplayTag& SkillTag = GetSkillTagByIndex(Skillndex);
-            SkillIconInfoList.Add({ SkillTag, IconTexture });
-            ++Skillndex;
+            UTexture2D* IconTexture = SkillAbility->GetSkillIcon();
+            if (IconTexture)
+            {
+                const FGameplayTag& SkillTag = GetSkillTagByIndex(Skillndex);
+                SkillIconInfoList.Add({ SkillTag, IconTexture });
+                ++Skillndex;
+            }
         }
     }
-        
+
     HUDWidget->SetSkillIconTexture(SkillIconInfoList);
 
-    AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UGBHealthAttributeSet::GetCurrentHealthAttribute())
-        .AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnHealthAttributeChanged);
-    AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UGBHealthAttributeSet::GetMaxHealthAttribute())
-        .AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnHealthAttributeChanged);
-    AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UGBSpeedAttributeSet::GetCurrnetStaminaAttribute())
-        .AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSpeedAttributeChanged);
-    AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UGBSpeedAttributeSet::GetMaxStaminaAttribute())
-        .AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSpeedAttributeChanged);
+    InASC->GetGameplayAttributeValueChangeDelegate(UGBHealthAttributeSet::GetCurrentHealthAttribute()).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnHealthAttributeChanged);
+    InASC->GetGameplayAttributeValueChangeDelegate(UGBHealthAttributeSet::GetMaxHealthAttribute()).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnHealthAttributeChanged);
+    InASC->GetGameplayAttributeValueChangeDelegate(UGBSpeedAttributeSet::GetCurrnetStaminaAttribute()).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSpeedAttributeChanged);
+    InASC->GetGameplayAttributeValueChangeDelegate(UGBSpeedAttributeSet::GetMaxStaminaAttribute()).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSpeedAttributeChanged);
 
-    const FGameplayTagContainer& BuffTags = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::State_Buff);
-    const FGameplayTagContainer& DebuffTags = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::State_Debuff);
-    const FGameplayTagContainer& CooldownTags = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::State_Cooldown);
-
+    const FGameplayTagContainer& BuffTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Buff);
     for (const FGameplayTag BuffTag : BuffTags)
     {
-        AbilitySystemComponent->RegisterGameplayTagEvent(BuffTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnBuffStateChanged);
+        InASC->RegisterGameplayTagEvent(BuffTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnBuffStateChanged);
     }
+
+    const FGameplayTagContainer& DebuffTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Debuff);
+    const FGameplayTagContainer& CooldownTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Cooldown);
 
     for (const FGameplayTag DebuffTag : DebuffTags)
     {
-        AbilitySystemComponent->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnBuffStateChanged);
+        InASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnBuffStateChanged);
     }
 
     for (const FGameplayTag CooldownTag : CooldownTags)
     {
-        AbilitySystemComponent->RegisterGameplayTagEvent(CooldownTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSkillCooldownChanged);
+        InASC->RegisterGameplayTagEvent(CooldownTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSkillCooldownChanged);
     }
 
-    AbilitySystemComponent->RegisterGameplayTagEvent(GBTag::State_EquipState_Equipped, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSkillInfoChanged);
+    InASC->RegisterGameplayTagEvent(GBTag::State_Combat_Equipped, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSkillInfoChanged);
 
     HUDWidget->AddToViewport();
 }
@@ -111,16 +111,42 @@ TOptional<FUIInputConfig> UGBPrimaryLayoutWidget::GetDesiredInputConfig() const
     return FUIInputConfig(ECommonInputMode::All, EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown, EMouseLockMode::LockOnCapture, true);
 }
 
+void UGBPrimaryLayoutWidget::NativeOnInitialized()
+{
+    Super::NativeOnInitialized();
+
+    if (InventoryAction.IsNull() == false)
+    {
+        RegisterUIActionBinding(FBindUIActionArgs(
+                InventoryAction,
+                false,
+                FSimpleDelegate::CreateUObject(this, &UGBPrimaryLayoutWidget::OnInventoryActionTriggered)
+            )
+        );
+    }
+}
+
 bool UGBPrimaryLayoutWidget::NativeOnHandleBackAction()
 {
-    UGBAsyncAction_PushSoftWidget* PushAction = UGBAsyncAction_PushSoftWidget::PushSoftWidget(this, GetOwningPlayerController(), 
-                                                    UGBUIFunctionLibrary::GetSoftWidgetClassByTag(GBTag::UI_Widget_MainMenuScreen), GBTag::UI_WidgetStack_GameMenu);
+    UGBAsyncAction_PushSoftWidget* PushAction = UGBAsyncAction_PushSoftWidget::PushSoftWidget(this, GetOwningPlayerController(),
+        UGBUIFunctionLibrary::GetSoftWidgetClassByTag(GBTag::UI_Widget_MainMenuScreen), GBTag::UI_WidgetStack_GameMenu);
     if (PushAction)
     {
         PushAction->Activate();
     }
 
+    // BackAction 들어왔다고 Deactivate 되면 안됨 Super 호출 X
     return true;
+}
+
+void UGBPrimaryLayoutWidget::OnInventoryActionTriggered()
+{
+    UGBAsyncAction_PushSoftWidget* PushAction = UGBAsyncAction_PushSoftWidget::PushSoftWidget(this, GetOwningPlayerController(),
+        UGBUIFunctionLibrary::GetSoftWidgetClassByTag(GBTag::UI_Widget_Inventory), GBTag::UI_WidgetStack_GameMenu);
+    if (PushAction)
+    {
+        PushAction->Activate();
+    }
 }
 
 FGameplayTag UGBPrimaryLayoutWidget::GetSkillTagByIndex(uint8 Index) const
@@ -137,7 +163,7 @@ FGameplayTag UGBPrimaryLayoutWidget::GetSkillTagByIndex(uint8 Index) const
         return GBTag::Trigger_Common_Skill04;
     default:
         GB_LOG(TEXT("Invalid Index : %i"), Index)
-        break;
+            break;
     }
 
     return FGameplayTag::EmptyTag;

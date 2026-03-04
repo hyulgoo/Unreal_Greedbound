@@ -29,7 +29,6 @@ protected:
 
 private:
     void                                        OnResetBoundActionTriggered();
-    void                                        OnBackBoundActionTriggered();
 
     UGBOptionsDataRegistry*                     GetOrCreateDataRegistry();
 

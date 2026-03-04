@@ -6,6 +6,8 @@
 #include "GB/AbilitySystem/GameplayAbility/GBGA_Base.h"
 #include "GBGA_Sprint.generated.h"
 
+class UGBMovementStateComponent;
+
 UCLASS()
 class GREEDBOUND_API UGBGA_Sprint : public UGBGA_Base
 {
@@ -20,5 +22,8 @@ public:
     virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override final;
                  
 private:         
+    UPROPERTY()
+    TObjectPtr<UGBMovementStateComponent> MovementStateComponent; 
+
     FTimerHandle RegenStaminaTimer;
 };

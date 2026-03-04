@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerState.h"
 #include "AbilitySystemInterface.h"
 #include "Define/Character/GBClassType.h"
+#include "Interface/GBInteractionInterface.h"
 #include "GBPlayerState.generated.h"
 
 class UAbilitySystemComponent;
@@ -19,17 +20,21 @@ class GREEDBOUND_API AGBPlayerState : public APlayerState, public IAbilitySystem
 public:
     AGBPlayerState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+    // Server
     FORCEINLINE const FString&          GetAuthToken() const { return AuthToken; }
     FORCEINLINE const FString&          GetCharacterId() const { return CharacterId; }
 
     FORCEINLINE void                    SetAuthToken(const FString& InToken) { AuthToken = InToken; }
     FORCEINLINE void                    SetCharacterId(const FString& InCharacterId) { CharacterId = InCharacterId; }
     
-    void                                SetAbilitySystemComponent(UAbilitySystemComponent* ASC);
-    virtual UAbilitySystemComponent*    GetAbilitySystemComponent() const override final;
+    // AbilitySystem
+    void                                SetAbilitySystemComponent(UAbilitySystemComponent* ASC) { AbilitySystemComponent = ASC; }
+    virtual UAbilitySystemComponent*    GetAbilitySystemComponent() const override final { return AbilitySystemComponent; }
 
     template <typename T>
     T*                                  GetAbilitySystemComponent() const { return Cast<T>(GetAbilitySystemComponent()); }
+
+    UGBInventoryComponent*              GetInventoryComponent() const { return InventoryComponent; }
 
     void                                SetSelectedClass(EGBCharacterClassType InClass);
     FORCEINLINE EGBCharacterClassType   GetSelectedClass() const { return SelectedClass;  }

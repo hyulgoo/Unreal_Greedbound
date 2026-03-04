@@ -2,14 +2,7 @@
 
 #include "GBSpeedAttributeSet.h"
 #include "Net/UnrealNetwork.h"
-#include "Define/GBDefine.h"
 #include "Define/GBTags.h"
-#include "AbilitySystem/GBGameplayAbilityHelper.h"
-
-bool UGBSpeedAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data)
-{
-    return true;
-}
 
 void UGBSpeedAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
@@ -21,7 +14,10 @@ void UGBSpeedAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribut
 
 void UGBSpeedAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
-    GB_CONDITION_CHECK_WITHOUT_LOG(OldValue > 0.f);
+    if (OldValue <= 0.f)
+    {
+        return;
+    }
 
     if (Attribute == GetCurrnetStaminaAttribute())
     {
@@ -30,7 +26,8 @@ void UGBSpeedAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribu
             UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
             if (ASC && ASC->GetOwnerRole() == ENetRole::ROLE_Authority)
             {
-                FGBGameplayAbilityHelper::SendGameplayEventToSelf(GBTag::Event_Common_StaminaEmpty, ASC);
+                FGameplayTagContainer CancelTags = FGameplayTagContainer(GBTag::Event_Common_StaminaEmpty);
+                ASC->CancelAbilities(&CancelTags);
             }
         }
     }
@@ -46,8 +43,14 @@ void UGBSpeedAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProp
     DOREPLIFETIME(UGBSpeedAttributeSet, SprintStaminaThreshould);
     DOREPLIFETIME(UGBSpeedAttributeSet, CrouchSpeedCoefficient);
 
-    DOREPLIFETIME_CONDITION_NOTIFY(UGBSpeedAttributeSet, CurrnetStamina, COND_None, REPNOTIFY_Always);
-    DOREPLIFETIME_CONDITION_NOTIFY(UGBSpeedAttributeSet, MaxStamina, COND_None, REPNOTIFY_Always);
+    DOREPLIFETIME_CONDITION_NOTIFY(UGBSpeedAttributeSet, CurrentSpeed, ELifetimeCondition::COND_None, ELifetimeRepNotifyCondition::REPNOTIFY_OnChanged);
+    DOREPLIFETIME_CONDITION_NOTIFY(UGBSpeedAttributeSet, CurrnetStamina, ELifetimeCondition::COND_None, ELifetimeRepNotifyCondition::REPNOTIFY_OnChanged);
+    DOREPLIFETIME_CONDITION_NOTIFY(UGBSpeedAttributeSet, MaxStamina, ELifetimeCondition::COND_None, ELifetimeRepNotifyCondition::REPNOTIFY_OnChanged);
+}
+
+void UGBSpeedAttributeSet::OnRep_CurrnetSpeed(const FGameplayAttributeData& OldValue)
+{
+    GAMEPLAYATTRIBUTE_REPNOTIFY(UGBSpeedAttributeSet, CurrentSpeed, OldValue);
 }
 
 void UGBSpeedAttributeSet::OnRep_CurrnetStamina(const FGameplayAttributeData& OldValue)

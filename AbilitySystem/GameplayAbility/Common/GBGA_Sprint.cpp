@@ -1,12 +1,11 @@
 ﻿#include "GBGA_Sprint.h"
-#include "AbilitySystemComponent.h"
 #include "AbilitySystem/Attribute/GBSpeedAttributeSet.h"
-#include "Interface/GBCharacterMovementInterface.h"
+#include "Interface/GBMovementInterface.h"
+#include "Components/GBMovementStateComponent.h"
 #include "Define/GBDefine.h"
 #include "Define/GBTags.h"
 
 constexpr float DelayToRegenStamina = 1.f;
-constexpr float MimStamina = 10.f;
 
 UGBGA_Sprint::UGBGA_Sprint(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -16,32 +15,49 @@ UGBGA_Sprint::UGBGA_Sprint(const FObjectInitializer& ObjectInitializer)
 
 bool UGBGA_Sprint::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
-    GB_CONDITION_CHECK_WITH_RETURN_WITHOUT_LOG(Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags), false);
-
-    FGameplayAttribute SpeedAttribute = UGBSpeedAttributeSet::GetCurrnetStaminaAttribute();
-    UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
-    if (ASC)
+    if (Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags) == false)
     {
-        const float CurrnetStamina = ASC->GetNumericAttribute(SpeedAttribute);
-        if (MimStamina > CurrnetStamina)
+        return false;
+    }
+
+    const FGameplayAttribute& CurrentStaminaAttribute = UGBSpeedAttributeSet::GetCurrnetStaminaAttribute();
+    const FGameplayAttribute& SprintThreshouldAttribute = UGBSpeedAttributeSet::GetSprintStaminaThreshouldAttribute();
+    UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+    if (ASC && CurrentStaminaAttribute.IsValid() && SprintThreshouldAttribute.IsValid())
+    {
+        const float CurrnetStamina = ASC->GetNumericAttribute(CurrentStaminaAttribute);
+        const float SprintThreshould = ASC->GetNumericAttribute(SprintThreshouldAttribute);
+        if (SprintThreshould < CurrnetStamina)
         {
-            return false;
+            return true;
         }
     }
 
-    return true;
+    return false;
 }
 
 void UGBGA_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
     Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-    GB_CONDITION_CHECK_WITHOUT_LOG(CommitAbility(Handle, ActorInfo, ActivationInfo));
-
-    TScriptInterface<IGBCharacterMovementInterface> CharacterMovementInterface = ActorInfo->AvatarActor.Get();
-    if (CharacterMovementInterface)
+    if (CommitAbility(Handle, ActorInfo, ActivationInfo) == false)
     {
-        CharacterMovementInterface->SetCharacterMoveState(EGBMoveState::Sprint);
+        return;
+    }
+
+    if (MovementStateComponent == nullptr)
+    {
+        MovementStateComponent = IGBMovementInterface::Execute_GetMovementStateComponent(ActorInfo->AvatarActor.Get());
+    }
+
+    GB_NULL_CHECK(MovementStateComponent);
+    MovementStateComponent->SetMoveState(EGBMoveState::Sprint);
+
+    UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
+    if (ASC)
+    {
+        const float SprintSpeed = ASC->GetNumericAttribute(UGBSpeedAttributeSet::GetSprintSpeedAttribute());
+        ASC->SetNumericAttributeBase(UGBSpeedAttributeSet::GetCurrentSpeedAttribute(), SprintSpeed);
     }
 
     if (RegenStaminaTimer.IsValid())
@@ -61,30 +77,33 @@ void UGBGA_Sprint::InputReleased(const FGameplayAbilitySpecHandle Handle, const 
 
 void UGBGA_Sprint::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-    TScriptInterface<IGBCharacterMovementInterface> CharacterMovementInterface = ActorInfo->AvatarActor.Get();
-    if (CharacterMovementInterface)
+    GB_NULL_CHECK(MovementStateComponent);
+    MovementStateComponent->SetMoveState(EGBMoveState::Walk);
+
+    UAbilitySystemComponent* ASC = ActorInfo->AbilitySystemComponent.Get();
+    if (ASC)
     {
-        CharacterMovementInterface->SetCharacterMoveState(EGBMoveState::Walk);
+        const float WalkSpeed = ASC->GetNumericAttribute(UGBSpeedAttributeSet::GetWalkSpeedAttribute());
+        ASC->SetNumericAttributeBase(UGBSpeedAttributeSet::GetCurrentSpeedAttribute(), WalkSpeed);
+    }
 
-        RemoveActiveEffectsByGrantedTag(GBTag::Duration_Cost_Stamina);
+    RemoveActiveEffectsByGrantedTag(GBTag::Duration_Cost_Stamina);
 
-        // DelayToRegenStamina 이후 RegenStamina GA Event 발동
-        FTimerDelegate LamdaDelegate = FTimerDelegate::CreateLambda([this]()
+    // DelayToRegenStamina 이후 RegenStamina GA Event 발동
+    FTimerDelegate LamdaDelegate = FTimerDelegate::CreateLambda([ASC]() 
+        {
+            if (ASC)
             {
-                UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
-                GB_NULL_CHECK_WITHOUT_LOG(ASC);
-
-                AActor* TargetActor = GetActorInfo().AvatarActor.Get();
                 FGameplayEventData EventData;
                 EventData.EventTag = GBTag::Trigger_Common_RegenStamina;
-                EventData.Target = TargetActor;
-                EventData.TargetTags = ASC->GetOwnedGameplayTags();
+                EventData.Instigator = ASC->GetAvatarActor();
 
-                ASC->HandleGameplayEvent(EventData.EventTag, &EventData);
-            });
+                ASC->HandleGameplayEvent(GBTag::Trigger_Common_RegenStamina, &EventData);
+            }
+        }
+    );
 
-        GetWorld()->GetTimerManager().SetTimer(RegenStaminaTimer, LamdaDelegate, DelayToRegenStamina, false);
-    }
+    GetWorld()->GetTimerManager().SetTimer(RegenStaminaTimer, LamdaDelegate, DelayToRegenStamina, false);
 
     Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

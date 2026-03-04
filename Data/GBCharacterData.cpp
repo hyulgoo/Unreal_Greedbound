@@ -1,7 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GBCharacterData.h"
-#include "AbilitySystem/GBGameplayAbilityHelper.h"
 #include "Define/GBTags.h"
 #include "Define/GBDefine.h"
 #include "AbilitySystem/Attribute/GBHealthAttributeSet.h"
@@ -76,7 +75,7 @@ void UGBAttributeData::UpdateAttributeFlags()
     bHasHealth = (AttributeFlags & EGBAttributeFlags::Health) != 0;
     if (bHasHealth)
     {
-        const FGameplayTagContainer& ChildTag = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::Attribute_Health);
+        const FGameplayTagContainer& ChildTag = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::Attribute_Health);;
         for (const FGameplayTag& Tag : ChildTag)
         {
             if (HealthAttributeData.Contains(Tag) == false)
@@ -93,7 +92,7 @@ void UGBAttributeData::UpdateAttributeFlags()
     bHasSpeed = (AttributeFlags & EGBAttributeFlags::Speed) != 0;
     if (bHasSpeed)    
     {
-        const FGameplayTagContainer& ChildTag = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::Attribute_Speed);
+        const FGameplayTagContainer& ChildTag = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::Attribute_Speed);
         for (const FGameplayTag& Tag : ChildTag)
         {
             if (SpeedAttributeData.Contains(Tag) == false)
@@ -110,7 +109,7 @@ void UGBAttributeData::UpdateAttributeFlags()
     bHasCombat = (AttributeFlags & EGBAttributeFlags::Combat) != 0;
     if (bHasCombat)
     {
-        const FGameplayTagContainer& ChildTag = FGBGameplayAbilityHelper::GetAllChildTag(GBTag::Attribute_Combat);
+        const FGameplayTagContainer& ChildTag = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::Attribute_Combat);
         for (const FGameplayTag& Tag : ChildTag)
         {
             if (CombatAttributeData.Contains(Tag) == false)
@@ -139,16 +138,9 @@ void UGBAttributeData::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 
 FPrimaryAssetId UGBCharacterData::GetPrimaryAssetId() const
 {
-    FName AssetType = NAME_None;
     FName AssetName = NAME_None;
     FString LastPart;
 
-    if (AssetTypeTag.IsValid())
-    {
-        FString AssetTypeTagStr = AssetTypeTag.ToString();
-        AssetTypeTagStr.Split(TEXT("."), nullptr, &LastPart, ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-        AssetType = FName(*LastPart);
-    }
     if (CharacterTag.IsValid())
     {
         FString AssetNameTagStr = CharacterTag.ToString();
@@ -156,7 +148,7 @@ FPrimaryAssetId UGBCharacterData::GetPrimaryAssetId() const
         AssetName = FName(*LastPart);
     }
 
-    return FPrimaryAssetId(AssetType, AssetName);
+    return FPrimaryAssetId(FName("CharacterData"), AssetName);
 }
 
 TArray<FGameplayAbilitySpec> UGBCharacterData::GetAbilitySpecs()

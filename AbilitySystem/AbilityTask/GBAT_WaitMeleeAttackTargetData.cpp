@@ -2,7 +2,6 @@
 
 #include "GBAT_WaitMeleeAttackTargetData.h"
 #include "Define/GBDefine.h"
-#include "AbilitySystem/TargetActor/GBTA_MeleeAttack.h"
 
 UGBAT_WaitMeleeAttackTargetData* UGBAT_WaitMeleeAttackTargetData::WaitForMeleeAttackTargetData(UGameplayAbility* OwningAbility, FName TaskInstanceName, UClass* TargetActorClass, UStaticMeshComponent* WeaponMesh, FTransform SpawnTransform)
 {
@@ -10,11 +9,6 @@ UGBAT_WaitMeleeAttackTargetData* UGBAT_WaitMeleeAttackTargetData::WaitForMeleeAt
     MyObj->WeaponMesh = WeaponMesh;
     MyObj->TargetActorClass = TargetActorClass;
     MyObj->TargetActorSpawnTransform = SpawnTransform;
-
-    if (MyObj->WeaponMesh == nullptr)
-    {
-        GB_TESTLOG(TEXT("WeaponMesh is null"));
-    }
 
     return MyObj;
 }

@@ -8,7 +8,10 @@ namespace GBTag
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Block_Input);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Block_Move);
 
-    UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_EquipState_Equipped);
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Combat);
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Combat_Equipped);
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Combat_Attack);
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Combat_Dead);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Movement_Sprint);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Movement_Crouch);
 
@@ -39,9 +42,6 @@ namespace GBTag
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Cooldown_Skill03);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Cooldown_Skill04);
 
-    UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Dead);
-
-
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_Health);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_Speed);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Attribute_Combat);
@@ -62,6 +62,7 @@ namespace GBTag
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Common_Ragdoll);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Common_Crouch);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Common_Jump);
+    UE_DECLARE_GAMEPLAY_TAG_EXTERN(Event_Common_PlayMontage);
 
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Trigger_Common);
     UE_DECLARE_GAMEPLAY_TAG_EXTERN(Trigger_Common_Skill01);

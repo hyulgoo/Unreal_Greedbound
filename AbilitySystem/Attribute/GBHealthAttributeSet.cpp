@@ -2,10 +2,8 @@
 
 #include "GBHealthAttributeSet.h"
 #include "Net/UnrealNetwork.h"
-#include "Define/GBTags.h"
-#include "Define/GBDefine.h"
-#include "AbilitySystem/GBGameplayAbilityHelper.h"
 #include "GameplayAbilities/Public/GameplayEffectExtension.h"
+#include "Define/GBTags.h"
 
 bool UGBHealthAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data)
 {
@@ -27,9 +25,17 @@ bool UGBHealthAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackD
 
 void UGBHealthAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
-    if (Data.EvaluatedData.Attribute == GetHitDirectionAttribute() && Data.EvaluatedData.Magnitude > 0.f)
+    if (Data.Target.GetOwnerRole() == ENetRole::ROLE_Authority)
     {
-        FGBGameplayAbilityHelper::SendGameplayEventToSelf(GBTag::Trigger_Common_HitReact, &Data.Target, GetHitDirection());
+        if (Data.EvaluatedData.Attribute == GetHitDirectionAttribute() && Data.EvaluatedData.Magnitude > 0.f)
+        {
+            FGameplayEventData EventData;
+            EventData.EventTag = GBTag::Trigger_Common_HitReact;
+            EventData.Instigator = Data.Target.GetAvatarActor();
+            EventData.EventMagnitude = GetHitDirection();
+
+            Data.Target.HandleGameplayEvent(GBTag::Trigger_Common_HitReact, &EventData);
+        }
     }
 }
 
@@ -47,16 +53,24 @@ void UGBHealthAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribu
 
 void UGBHealthAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
+    if (OldValue <= 0.f)
+    {
+        return;
+    }
+
     if (Attribute == GetCurrentHealthAttribute())
     {
-        GB_CONDITION_CHECK_WITHOUT_LOG(OldValue > 0.f);
-
         UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent();
         if (ASC && ASC->GetOwnerRole() == ENetRole::ROLE_Authority)
         {
             if (NewValue <= 0.f)
             {
-                FGBGameplayAbilityHelper::SendGameplayEventToSelf(GBTag::Trigger_Common_Dead, ASC, GetHitDirection());
+                FGameplayEventData EventData;
+                EventData.EventTag = GBTag::Trigger_Common_Dead;
+                EventData.Instigator = ASC->GetAvatarActor();
+                EventData.EventMagnitude = GetHitDirection();
+
+                ASC->HandleGameplayEvent(GBTag::Trigger_Common_Dead, &EventData);
             }
         }
     }

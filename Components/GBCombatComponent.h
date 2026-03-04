@@ -7,8 +7,8 @@
 #include "Character/GBCharacterStateTypes.h"
 #include "GBCombatComponent.generated.h"
 
-class UGBCombatData;
 class AGBWeapon;
+class UGBCombatData;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class GREEDBOUND_API UGBCombatComponent : public UActorComponent
@@ -16,17 +16,20 @@ class GREEDBOUND_API UGBCombatComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
-    void                    SetCombatState(const EGBCombatState NewState);
-    EGBCombatState          GetCombatState() const;
-
     void                    EquipWeapon(AGBWeapon* NewWeapon);
     UStaticMeshComponent*   GetWeaponMesh() const;
-
     void                    SetWeaponTrailEffect(const bool bActive);
 
-private:
-    EGBCombatState          CombatState = EGBCombatState::Idle;
+    EGBCombatState          GetCombatState() const { return CombatState; }
+    void                    SetCombatState(EGBCombatState NewState) { CombatState = NewState; }
 
-    UPROPERTY()
+    void                    SetAttackProfile(FName Profile) { AttackProfile = Profile; }
+    FName                   GetAttackProfile() const { return AttackProfile; }
+
+private:
+    UPROPERTY(Transient)
     TObjectPtr<AGBWeapon>   Weapon;
+
+    EGBCombatState          CombatState;
+    FName                   AttackProfile;
 };

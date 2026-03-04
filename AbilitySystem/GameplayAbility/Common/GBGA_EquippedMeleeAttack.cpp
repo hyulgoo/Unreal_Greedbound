@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GBGA_EquippedMeleeAttack.h"
-#include "Interface/GBCharacterCombatInterface.h"
+#include "Components/GBCombatComponent.h"
 #include "AbilitySystem/AbilityTask/GBAT_WaitMeleeAttackTargetData.h"
 #include "Define/GBDefine.h"
 #include "Define/GBTags.h"
@@ -10,16 +10,18 @@ UGBGA_EquippedMeleeAttack::UGBGA_EquippedMeleeAttack(const FObjectInitializer& O
     : Super(ObjectInitializer)
 {
     InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-    EventTags.AddTag(GBTag::Event_Common_TrailAttackBegin);
-    EventTags.AddTag(GBTag::Event_Common_TrailAttackEnd);
+    EventReceiveTags.AddTag(GBTag::Event_Common_TrailAttackBegin);
+    EventReceiveTags.AddTag(GBTag::Event_Common_TrailAttackEnd);
 }
 
 void UGBGA_EquippedMeleeAttack::OnEventReceived(const FGameplayTag EventTag, FGameplayEventData EventData)
 {
     Super::OnEventReceived(EventTag, EventData);
 
-    TScriptInterface<IGBCharacterCombatInterface> CombatInterface = CurrentActorInfo->AvatarActor.Get();
-    GB_CONDITION_CHECK_WITHOUT_LOG(CombatInterface && HasAuthority(&CurrentActivationInfo));
+    if (HasAuthority(&CurrentActivationInfo) == false)
+    {
+        return;
+    }
 
     if (EventTag == GBTag::Event_Common_TrailAttackBegin)
     {
@@ -29,7 +31,9 @@ void UGBGA_EquippedMeleeAttack::OnEventReceived(const FGameplayTag EventTag, FGa
         }
         else
         {
-            UStaticMeshComponent* WeaponMesh = CombatInterface->GetWeaponMesh();
+            GB_NULL_CHECK(CombatComponent);
+
+            UStaticMeshComponent* WeaponMesh = CombatComponent->GetWeaponMesh();
             GB_NULL_CHECK(WeaponMesh);
 
             WaitMeleeAttackTargetDataTask = UGBAT_WaitMeleeAttackTargetData::WaitForMeleeAttackTargetData(

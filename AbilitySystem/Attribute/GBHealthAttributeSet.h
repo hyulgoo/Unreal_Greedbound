@@ -16,11 +16,12 @@ class GREEDBOUND_API UGBHealthAttributeSet : public UAttributeSet
     GENERATED_BODY()
 
 public:
+
     ATTRIBUTE_ACCESSORS_BASIC(UGBHealthAttributeSet, CurrentHealth);
     ATTRIBUTE_ACCESSORS_BASIC(UGBHealthAttributeSet, MaxHealth);
     ATTRIBUTE_ACCESSORS_BASIC(UGBHealthAttributeSet, HitDirection);
 
-    // [25/06/25] 강현구 : 아래 4개 함수는 부모에서 구현부가 없는 함수이므로 Super 호출하지 말 것
+    // 아래 4개 함수는 부모에서 구현부가 없는 함수이므로 Super 호출하지 말 것
     virtual bool                PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data) override final;
     virtual void                PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override final;
     virtual void                PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override final;

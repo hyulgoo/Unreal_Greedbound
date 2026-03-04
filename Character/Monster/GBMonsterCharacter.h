@@ -29,12 +29,8 @@ protected:
     virtual void                            PossessedBy(AController* NewController) override final;
     virtual void                            Tick(float DeltaTime) override final;
 
-    virtual void                            OnMovementStateTagChanged(const FGameplayTag Tag, const int32 Count) override final;
-
-    virtual  FName                          GetAttackProfile() const { return GBCOLLISION_PROFILE_MONSTERAOE; }
-
     // IGBMonsterBaseInterface
-    virtual UGBMonsterBaseData*             GetMonsterBaseData() const;
+    virtual UGBMonsterBaseData*             GetMonsterBaseData_Implementation() const override;
 
 private:
     void                                    UpdateStopState();

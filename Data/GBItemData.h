@@ -19,6 +19,9 @@ class GREEDBOUND_API UGBBaseItemData : public UPrimaryDataAsset
     GENERATED_BODY()
 
 public:
+    virtual FPrimaryAssetId             GetPrimaryAssetId() const override { return FPrimaryAssetId(FName("ItemData"), *GetName()); }
+
+public:
     UPROPERTY(EditDefaultsOnly)
     FText                               Name;
 
@@ -38,7 +41,7 @@ public:
     float                               Weight;
 
     UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UTexture2D>              Icon;
+    FSlateBrush                         Icon;
 };
 
 UCLASS()
@@ -48,13 +51,13 @@ class GREEDBOUND_API UGBEquipmentItemData : public UGBBaseItemData
 
 public:
     UPROPERTY(EditDefaultsOnly)
-    EGBEquipSlotType                    EquipSlot;
+    EGBEquipSlotType                        EquipSlot;
+
+    UPROPERTY(EditDefaultsOnly, meta = (Categories = "Character.Player"))
+    EGBCharacterClassType                   ClassType;
 
     UPROPERTY(EditDefaultsOnly)
-    EGBCharacterClassType               ClassTypeTag;
-
-    UPROPERTY(EditDefaultsOnly)
-    TArray<TObjectPtr<UGameplayEffect>> Effects;
+    TArray<TSubclassOf<UGameplayEffect>>    Effects;
 };
 
 UCLASS()
@@ -64,10 +67,10 @@ class GREEDBOUND_API UGBConsumableItemData : public UGBBaseItemData
 
 public:
     UPROPERTY(EditDefaultsOnly)
-    float                               UseDelay;
+    float                                   UseDelay;
 
     UPROPERTY(EditDefaultsOnly)
-    TArray<TObjectPtr<UGameplayEffect>> Effects;
+    TArray<TSubclassOf<UGameplayEffect>>    Effects;
 };
 
 // Item의 인스턴스 정보, 추후 요소 추가 대비해서 구조체로 둠
@@ -87,8 +90,9 @@ struct GREEDBOUND_API FGBInventorySlot : public FFastArraySerializerItem
     GENERATED_BODY()
 
 public:
+    bool                                IsValid() const { return ItemId.IsValid(); }
     bool                                IsEmpty() const { return ItemId.IsValid() || Count <= 0; }
-    void                                MakeEmpty() { ItemId = FPrimaryAssetId(); Count = 0; InstanceData = FGBItemInstanceData{}; }
+    void                                MakeEmpty() { ItemId = FPrimaryAssetId(); Count = 0; }
 
 public:
     UPROPERTY()
@@ -109,16 +113,28 @@ struct GREEDBOUND_API FGBInventoryList : public FFastArraySerializer
 public:
     // NetDeltaSerialize 내에서 FastArrayDeltaSerialize를 사용하는 FFastArraySerializer에서 
     // PostReplicatied~ 시그니처 함수가 있으면 Delta 적용 코드에서 호출함
-    bool                                NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParam);
+    bool                                    NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParam);
 
-    void                                PostReplicatiedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);
-    void                                PostReplicatiedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize);
-    void                                PostReplicatiedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize);
+    void                                    PostReplicatedAdd(const TArrayView<int32>& AddedIndices, int32 FinalSize);
+    void                                    PostReplicatedChange(const TArrayView<int32>& ChangedIndices, int32 FinalSize);
+    void                                    PostReplicatedRemove(const TArrayView<int32>& RemovedIndices, int32 FinalSize);
+
+    int32                                   FindIndexByAssetId(const FPrimaryAssetId& Id);
+    int32                                   TryPush(FPrimaryAssetId Id, int32 Count);
 
 public:
     UPROPERTY()
-    TArray<FGBInventorySlot>            Slots;
+    TArray<FGBInventorySlot>                Slots;
 
     UPROPERTY(NotReplicated)
-    TObjectPtr<UGBInventoryComponent>   OwnerComponent;
+    TWeakObjectPtr<UGBInventoryComponent>   OwnerComponent;
+};
+
+template<>
+struct TStructOpsTypeTraits<FGBInventoryList> : public TStructOpsTypeTraitsBase2<FGBInventoryList>
+{
+    enum
+    {
+        WithNetDeltaSerializer = true,
+    };
 };

@@ -39,7 +39,7 @@ protected:
     
     // UI
     UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-    void                                        InitializePlayerUI();
+    void                                        BP_InitializePlayerUI();
 
 private:
     virtual void                                SetupInputComponent() override;

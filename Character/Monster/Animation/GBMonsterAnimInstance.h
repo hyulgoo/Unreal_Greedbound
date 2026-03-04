@@ -9,6 +9,7 @@
 
 class ACharacter;
 class UCharacterMovementComponent;
+class UGBMovementStateComponent;
 
 UCLASS()
 class GREEDBOUND_API UGBMonsterAnimInstance : public UAnimInstance
@@ -16,11 +17,8 @@ class GREEDBOUND_API UGBMonsterAnimInstance : public UAnimInstance
     GENERATED_BODY()
 
 protected:
-    virtual void                            NativeInitializeAnimation() override;
+    virtual void                            NativeBeginPlay() override;
     virtual void                            NativeUpdateAnimation(float DeltaSeconds) override;
-
-private:
-    void                                    InitBaseSpeed();
 
 protected:
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
@@ -28,6 +26,9 @@ protected:
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
     TObjectPtr<UCharacterMovementComponent> Movement;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Movement")
+    TObjectPtr<UGBMovementStateComponent>   MovementState;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
     FVector                                 Velocity;
@@ -42,22 +43,20 @@ protected:
     float                                   Strafe;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
-    float                                   BaseWalkSpeed = 1.f;
+    float                                   BaseWalkSpeed = 250.f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
-    float                                   BaseSprintSpeed = 1.f;
+    float                                   BaseSprintSpeed = 500.f;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
-    EGBStanceState                          StanceStateType;
+    EGBStanceState                          StanceState;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
-    EGBStopState                            StopStateType;
+    EGBStopState                            StopState;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
-    EGBMoveState                            MoveStateType;
+    EGBMoveState                            MoveState;
 
     UPROPERTY(BlueprintReadOnly, Category = "Movement")
     bool                                    bIsFalling;
-
-    FTimerHandle                            SetBaseSpeedTimer;
 };

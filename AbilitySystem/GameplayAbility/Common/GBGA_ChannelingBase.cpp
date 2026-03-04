@@ -14,9 +14,7 @@ UGBGA_ChannelingBase::UGBGA_ChannelingBase()
     InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
 
-bool UGBGA_ChannelingBase::CanStartChanneling(
-    const FGameplayAbilitySpecHandle& Handle,
-    const FGameplayAbilityActorInfo* ActorInfo) const
+bool UGBGA_ChannelingBase::CanStartChanneling(const FGameplayAbilitySpecHandle& Handle, const FGameplayAbilityActorInfo* ActorInfo) const 
 {
     FGameplayTagContainer FailureTags;
 
@@ -36,11 +34,7 @@ bool UGBGA_ChannelingBase::CanStartChanneling(
 }
 
 
-void UGBGA_ChannelingBase::ActivateAbility(
-    const FGameplayAbilitySpecHandle      Handle,
-    const FGameplayAbilityActorInfo* ActorInfo,
-    const FGameplayAbilityActivationInfo  ActivationInfo,
-    const FGameplayEventData* TriggerEventData)
+void UGBGA_ChannelingBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo  ActivationInfo, const FGameplayEventData* TriggerEventData) 
 {
     Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 

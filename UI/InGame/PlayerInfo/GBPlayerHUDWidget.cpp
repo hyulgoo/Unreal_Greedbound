@@ -1,21 +1,19 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GBPlayerHUDWidget.h"
-#include "AbilitySystemComponent.h"
+#include "Components/GBAbilitySystemComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/HorizontalBox.h"
 #include "Define/GBDefine.h"
 #include "Define/GBTags.h"
-#include "AbilitySystem/GBGameplayAbilityHelper.h"
 #include "AbilitySystem/Attribute/GBHealthAttributeSet.h"
 #include "AbilitySystem/Attribute/GBSpeedAttributeSet.h"
 #include "UI/InGame/PlayerInfo/GBDurationIconWidget.h"
 
 void UGBPlayerHUDWidget::InitializeAttributeInfo(UAbilitySystemComponent* ASC)
 {
-    GB_NULL_CHECK(ASC);
-
-    AbilitySystemComponent = ASC;
+    AbilitySystemComponent = Cast<UGBAbilitySystemComponent>(ASC);
+    GB_NULL_CHECK(AbilitySystemComponent);
 
     const UGBHealthAttributeSet* HealthAttributeSet = ASC->GetSet<UGBHealthAttributeSet>();
     if (HealthAttributeSet)
@@ -142,8 +140,11 @@ void UGBPlayerHUDWidget::UpdateProgressbar(UProgressBar* Progressbar, const floa
 
 void UGBPlayerHUDWidget::UpdateBuffRemainInfo()
 {
-    GB_VALID_CHECK_WITHOUT_LOG(AbilitySystemComponent);
-    GB_CONDITION_CHECK_WITHOUT_LOG(CurrentBuffState.IsEmpty() == false);
+    GB_VALID_CHECK(AbilitySystemComponent);
+    if (CurrentBuffState.IsEmpty())
+    {
+        return;
+    }
 
     const int32 BuffCount = CurrentBuffState.Num();
     const int32 BuffWidgetCount = HB_Buff->GetChildrenCount();
@@ -162,7 +163,7 @@ void UGBPlayerHUDWidget::UpdateBuffRemainInfo()
         if (BuffTag.IsValid())
         {
             float RemainingTime = 0.f, TotalDuration = 0.f;
-            FGBGameplayAbilityHelper::GetGameplayEffectDurationByTag(AbilitySystemComponent, BuffTag, RemainingTime, TotalDuration);
+            AbilitySystemComponent->GetGameplayEffectDurationByAssetTag(BuffTag, RemainingTime, TotalDuration);
 
             BuffIWidget->SetDurationInfo(RemainingTime, TotalDuration);
         }
@@ -174,8 +175,11 @@ void UGBPlayerHUDWidget::UpdateBuffRemainInfo()
 
 void UGBPlayerHUDWidget::UpdateSkillRemainInfo()
 {
-    GB_VALID_CHECK_WITHOUT_LOG(AbilitySystemComponent);
-    GB_CONDITION_CHECK_WITHOUT_LOG(SkillNumbersOnCooldown.IsEmpty() == false);
+    GB_VALID_CHECK(AbilitySystemComponent);
+    if (SkillNumbersOnCooldown.IsEmpty())
+    {
+        return;
+    }
 
     int32 SkillCount = SkillNumbersOnCooldown.Num();
     for (int32 SkillIndex = 0; SkillIndex < SkillCount; ++SkillIndex)
@@ -189,7 +193,7 @@ void UGBPlayerHUDWidget::UpdateSkillRemainInfo()
         if (SkillTag.IsValid())
         {
             float RemainingTime = 0.f, TotalDuration = 0.f;
-            FGBGameplayAbilityHelper::GetAbilityCoolTimeByTag(AbilitySystemComponent, SkillTag, RemainingTime, TotalDuration);
+            AbilitySystemComponent->GetAbilityCoolTimeByAssetTag(SkillTag, RemainingTime, TotalDuration);
             SkillWidget->SetDurationInfo(RemainingTime, TotalDuration);
         }
     }
@@ -202,7 +206,7 @@ void UGBPlayerHUDWidget::UpdateSkillIconImage()
 {
     const TArray<UWidget*>& SkillChilds = HB_Skill->GetAllChildren();
 
-    if (IsValid(AbilitySystemComponent) && AbilitySystemComponent->HasMatchingGameplayTag(GBTag::State_EquipState_Equipped))
+    if (IsValid(AbilitySystemComponent) && AbilitySystemComponent->HasMatchingGameplayTag(GBTag::State_Combat_Equipped))
     {
         int32 IconIndex = 1;
         for (UWidget* ChildWidget : SkillChilds)
@@ -257,10 +261,11 @@ void UGBPlayerHUDWidget::SetSkillIconTexture(const TArray<TPair<FGameplayTag, UT
 
 void UGBPlayerHUDWidget::OnSkillCooldownChanged(const FGameplayTag Tag, const int32 Count)
 {
-    GB_VALID_CHECK_WITHOUT_LOG(AbilitySystemComponent);
+    GB_VALID_CHECK(AbilitySystemComponent);
+
     int32 SkillIndex = 0;
     GB_CONDITION_CHECK(GetIndexByCooldownTag(Tag, SkillIndex));
-    GB_CONDITION_CHECK_WITHOUT_LOG(SkillIndex != 0);
+    GB_CONDITION_CHECK(SkillIndex != 0);
     GB_CONDITION_CHECK(SkillIndex <= HB_Skill->GetChildrenCount());
 
     UWidget* SkillIcon = HB_Skill->GetChildAt(SkillIndex - 1);
