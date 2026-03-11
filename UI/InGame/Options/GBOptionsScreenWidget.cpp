@@ -2,7 +2,6 @@
 
 #include "GBOptionsScreenWidget.h"
 #include "Input/CommonUIInputTypes.h"
-#include "ICommonInputModule.h"
 #include "ProjectSetting/GBGameUserSettings.h"
 #include "Subsystem/UI/GBUISubsystem.h"
 #include "Define/GBDefine.h"
@@ -28,14 +27,6 @@ void UGBOptionsScreenWidget::NativeOnInitialized()
             )
         );
     }
-
-    RegisterUIActionBinding(
-        FBindUIActionArgs(
-            ICommonInputModule::GetSettings().GetDefaultBackAction(),
-            true,
-            FSimpleDelegate::CreateUObject(this, &UCommonActivatableWidget::DeactivateWidget)
-        )
-    );
 
     CTL_OptionsTabListWidget->OnTabSelected.AddUniqueDynamic(this, &UGBOptionsScreenWidget::OnOptionsTabSelected);
 
@@ -72,6 +63,8 @@ void UGBOptionsScreenWidget::NativeOnDeactivated()
 
 UWidget* UGBOptionsScreenWidget::NativeGetDesiredFocusTarget() const
 {
+    UGBUISubsystem::Get(this)->SetHUDVisible(false);
+
     if (UObject* SelectedObject = CLV_OptionList->GetSelectedItem())
     {
         if (UUserWidget* SelectedEntryWidget = CLV_OptionList->GetEntryWidgetFromItem(SelectedObject))
@@ -80,7 +73,15 @@ UWidget* UGBOptionsScreenWidget::NativeGetDesiredFocusTarget() const
         }
     }
 
-    UGBUISubsystem::Get(GetOwningLocalPlayer())->SetHUDVisible(false);
+    if (CLV_OptionList && CLV_OptionList->GetNumItems() > 0)
+    {
+        return CLV_OptionList;
+    }
+
+    if (CTL_OptionsTabListWidget)
+    {
+        return CTL_OptionsTabListWidget;
+    }
 
     return Super::NativeGetDesiredFocusTarget();
 }
@@ -90,7 +91,6 @@ void UGBOptionsScreenWidget::OnResetBoundActionTriggered()
     GB_CONDITION_CHECK(ResetableDataList.IsEmpty() == false);
 
     UCommonButtonBase* SelectedTabButton = CTL_OptionsTabListWidget->GetTabButtonBaseByID(CTL_OptionsTabListWidget->GetActiveTab());
-
     const FString SelectedButtonName = CastChecked<UGBCommonButtonBase>(SelectedTabButton)->GetButtonDisplayText().ToString();
 
     UGBUISubsystem::Get(this)->PushConfirmScreenToModalStackAynsc(

@@ -20,7 +20,6 @@ void UGBListEntryWidget_Base::NativeOnListEntryWidgetHovered(bool bWasHovered)
     }
 }
 
-
 void UGBListEntryWidget_Base::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
     IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);

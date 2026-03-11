@@ -1,6 +1,5 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Game/Dungeon/GBDungeonGameMode.h"
 #include "Game/Dungeon/GBDungeonGameState.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,14 +23,11 @@
 #include "Subsystem/Network/Dedicated/GBDedicatedHttpManagerSubsystem.h"
 #include "Define/GBDefine.h"
 
-
-
 // 순서 : 1
 AGBDungeonGameMode::AGBDungeonGameMode()
 {
     bDelayedStart = true;               // 서버가 StartMatch 시점 제어
     bStartPlayersAsSpectators = true;   // 시작 전 관전자 처리(원하면 false)
-
 
     // BP를 쓰지 않으면 이값으로 사용되지만, 우리는 GBDungeonGameMode를 상속받은 BP_GBDungeonGameMode를 사용한다.
     // 따라서 이 값은 의미가 없고 Override될 것임. 
@@ -96,7 +92,6 @@ void AGBDungeonGameMode::StartPlay()
 
     // 소캣 연결 시도
     DedicatedSocketSubsystem->ConnectSocket(DungeonToken);
-
 }
 
 // 순서 4 : 
@@ -149,7 +144,6 @@ FString AGBDungeonGameMode::InitNewPlayer(APlayerController* NewPC, const FUniqu
     {
         return Error;
     }
-
 
     const FString TeamId = UGameplayStatics::ParseOption(Options, TEXT("teamId"));
     int32   ClassInt = UGameplayStatics::GetIntOption(Options, TEXT("class"), 0);
@@ -398,6 +392,7 @@ int32 AGBDungeonGameMode::GetExpectedPlayerCount() const
     }
     return Total;
 }
+
 int32 AGBDungeonGameMode::GetConnectedPlayerCount() const
 {
     int32 Total = 0;
@@ -409,7 +404,6 @@ int32 AGBDungeonGameMode::GetConnectedPlayerCount() const
     }
     return Total;
 }
-
 
 UClass* AGBDungeonGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
@@ -430,6 +424,7 @@ UClass* AGBDungeonGameMode::GetDefaultPawnClassForController_Implementation(ACon
             GB_DEV_LOG(TEXT("[PawnSelect] No presentation for Class=%d"), (int32)PS->GetSelectedClass());
         }
     }*/
+
     return Super::GetDefaultPawnClassForController_Implementation(InController);
 }
 
@@ -543,7 +538,6 @@ TSubclassOf<AHUD> AGBDungeonGameMode::ChooseHUDFromPS(const AGBPlayerState* PS) 
     return GetClassPresentationFromPS(PS, Row) ? Row.HUDClass : nullptr;
 }
 
-
 AGBCharacterSpawnPoint* AGBDungeonGameMode::ReserveAnchorForTeam(const FString& TeamId, int32 TeamSize)
 {
     // 이미 예약돼 있으면 그냥 반환
@@ -602,7 +596,6 @@ bool AGBDungeonGameMode::PopNextSlotForTeam(const FString& TeamId, FTransform& O
             return true;
         }
     }
-
     else
     {
         GB_BACKEND_LOG(Warning, TEXT("PopNextSlotForTeam Failed for TeamId : %s"), *TeamId);
@@ -610,5 +603,3 @@ bool AGBDungeonGameMode::PopNextSlotForTeam(const FString& TeamId, FTransform& O
 
     return false;
 }
-
- 

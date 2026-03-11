@@ -49,13 +49,6 @@ void UGBAsyncAction_PushSoftWidget::Activate()
                 break;
             case EGBAsyncPushWidgetState::AfterPush:
                 OnWidgetCreatedAfterPush.Broadcast(PushedWidget);
-                if (bCachedFocusOnNewlyPushedWidget)
-                {
-                    if (UWidget* WidgetToFocus = PushedWidget->GetDesiredFocusTarget())
-                    {
-                        WidgetToFocus->SetFocus();
-                    }
-                }
 
                 SetReadyToDestroy();
                 break;

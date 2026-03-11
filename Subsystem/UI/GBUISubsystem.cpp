@@ -46,6 +46,8 @@ void UGBUISubsystem::PushSoftWidgetToStackAynsc(const FGameplayTag& InWidgetStac
 {
     GB_CONDITION_CHECK(InSoftWidgetClass.IsNull() == false);
 
+    bIsPushingWidget = true;
+
     UGBAssetManager::Get().GetStreamableManager().RequestAsyncLoad(
         InSoftWidgetClass.ToSoftObjectPath(),
         FStreamableDelegate::CreateLambda(
@@ -58,6 +60,13 @@ void UGBUISubsystem::PushSoftWidgetToStackAynsc(const FGameplayTag& InWidgetStac
                 UCommonActivatableWidgetContainerBase* FoundWidgetStack = CreatedPrimaryLayoutWidget->FindWidgetStackByTag(InWidgetStackTag);
                 GB_NULL_CHECK(FoundWidgetStack);
 
+                UCommonActivatableWidget* ActivatedWidget = FoundWidgetStack->GetActiveWidget();
+                if (ActivatedWidget && ActivatedWidget->IsA(LoadedWidgetClass))
+                {
+                    ActivatedWidget->DeactivateWidget();
+                    return;
+                }
+
                 UGBActivatableBaseWidget* CreatedWidget = FoundWidgetStack->AddWidget<UGBActivatableBaseWidget>(
                     LoadedWidgetClass,
                     [AsyncPushStateCallback](UGBActivatableBaseWidget& CreatedWidgetInstance)
@@ -67,6 +76,8 @@ void UGBUISubsystem::PushSoftWidgetToStackAynsc(const FGameplayTag& InWidgetStac
                 );
 
                 AsyncPushStateCallback(EGBAsyncPushWidgetState::AfterPush, CreatedWidget);
+
+                bIsPushingWidget = false;
             }
         )
     );
@@ -117,7 +128,8 @@ void UGBUISubsystem::SetHUDWidget(UAbilitySystemComponent* ASC)
 
 void UGBUISubsystem::SetHUDVisible(bool bIsVisible)
 {
-    GB_NULL_CHECK(CreatedPrimaryLayoutWidget);
-
-    CreatedPrimaryLayoutWidget->SetHUDVisible(bIsVisible);
+    if (CreatedPrimaryLayoutWidget)
+    {
+        CreatedPrimaryLayoutWidget->SetHUDVisible(bIsVisible);
+    }
 }

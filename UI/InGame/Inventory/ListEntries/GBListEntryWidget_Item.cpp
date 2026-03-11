@@ -15,10 +15,16 @@ void UGBListEntryWidget_Item::OnOwingListDataObjectSet(UGBListDataObject_Base* I
         GB_NULL_CHECK(CachedItemDataObject);
     }
 
-    if (CachedItemDataObject->GetItemData().ItemId.IsValid())
+    if (CachedItemData == nullptr)
     {
-        UGBAssetLoadSubsystem::Get(GetOwningLocalPlayer())->LoadItemDataByAssetId(CachedItemDataObject->GetItemData().ItemId,
-            FOnItemLoaded::CreateUObject(this, &UGBListEntryWidget_Item::OnItemDataLoaded));
+        if (CachedItemDataObject->GetItemSlotData().ItemId.IsValid())
+        {
+            CachedItemDataObject->TryGetItemData(GetOwningPlayer(), FGBOnItemLoaded::CreateUObject(this, &UGBListEntryWidget_Item::OnItemDataLoaded));
+        }
+    }
+    else
+    {
+        SetItemSlot(CachedItemDataObject->GetItemSlotData().Count, CachedItemData->Icon);
     }
 
     Super::OnOwingListDataObjectSet(InOwningListDataObject);
@@ -32,11 +38,20 @@ void UGBListEntryWidget_Item::OnOwningListDataObjectModified(UGBListDataObject_B
         GB_NULL_CHECK(CachedItemDataObject);
     }
 
-    if (CachedItemDataObject->GetItemData().ItemId.IsValid())
+    if (CachedItemData == nullptr)
     {
-        UGBAssetLoadSubsystem::Get(GetOwningLocalPlayer())->LoadItemDataByAssetId(CachedItemDataObject->GetItemData().ItemId,
-            FOnItemLoaded::CreateUObject(this, &UGBListEntryWidget_Item::OnItemDataLoaded));
+        CachedItemDataObject->TryGetItemData(GetOwningPlayer(), FGBOnItemLoaded::CreateUObject(this, &UGBListEntryWidget_Item::OnItemDataLoaded));
     }
+    else
+    {
+        SetItemSlot(CachedItemDataObject->GetItemSlotData().Count, CachedItemData->Icon);
+    }
+}
+
+void UGBListEntryWidget_Item::SetItemSlot(int32 Count, const FSlateBrush& IconImage)
+{
+    CB_ItemSlot->SetButtonText(FText::FromString(FString::Printf(TEXT(" %d"), Count)));
+    CB_ItemSlot->SetButtonDisplayImage(IconImage);
 }
 
 void UGBListEntryWidget_Item::OnItemDataLoaded(bool bSuccessd, UGBBaseItemData* ItemData)
@@ -44,10 +59,8 @@ void UGBListEntryWidget_Item::OnItemDataLoaded(bool bSuccessd, UGBBaseItemData* 
     if (bSuccessd)
     {
         GB_NULL_CHECK(ItemData);
-        GB_NULL_CHECK(CachedItemDataObject);
 
-        CachedItemDataObject->SetDataDisplayName(ItemData->Name);
-        CB_ItemSlot->SetButtonText(FText::FromString(FString::Printf(TEXT("%d"), CachedItemDataObject->GetItemData().Count)));
-        CB_ItemSlot->SetButtonDisplayImage(ItemData->Icon);
+        CachedItemData = ItemData;
+        SetItemSlot(CachedItemDataObject->GetItemSlotData().Count, CachedItemData->Icon);
     }
 }

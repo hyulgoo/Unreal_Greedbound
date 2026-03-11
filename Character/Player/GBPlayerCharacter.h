@@ -39,21 +39,21 @@ private:
     virtual void                            OnRep_PlayerState() override final;
 
 private:
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "PlayerCharacter")
     TObjectPtr<UCameraComponent>            Camera;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "PlayerCharacter")
     TObjectPtr<USpringArmComponent>         SpringArm;
         
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Escape", Meta = (AllowPrivateAccess))
     TObjectPtr<UGBEscapeHandlerComponent>   EscapeComponent;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(Transient)
     TObjectPtr<UGBInventoryComponent>       CachedInventoryComponent;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "PlayerCharacter")
     TObjectPtr<UGBInteractionComponent>     InteractionComponent;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "PlayerCharacter")
     EGBCharacterClassType                   ClassType;
 };

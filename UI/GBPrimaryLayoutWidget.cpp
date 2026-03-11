@@ -7,10 +7,13 @@
 #include "Define/GBTags.h"
 #include "UI/GBUIFunctionLibrary.h"
 #include "UI/InGame/PlayerInfo/GBPlayerHUDWidget.h"
+#include "UI/InGame/Options/GBOptionsScreenWidget.h"
+#include "UI/InGame/Inventory/GBInventoryScreenWidget.h"
 #include "UI/InGame/AsyncAction/GBAsyncAction_PushSoftWidget.h"
 #include "AbilitySystem/Attribute/GBHealthAttributeSet.h"
 #include "AbilitySystem/Attribute/GBSpeedAttributeSet.h"
 #include "AbilitySystem/GameplayAbility/Player/GBGA_PlayerSkill.h"
+#include "Subsystem/UI/GBUISubsystem.h"
 
 UCommonActivatableWidgetContainerBase* UGBPrimaryLayoutWidget::FindWidgetStackByTag(const FGameplayTag& InTag) const
 {
@@ -18,31 +21,26 @@ UCommonActivatableWidgetContainerBase* UGBPrimaryLayoutWidget::FindWidgetStackBy
     return RegisteredWidgetStackMap.FindRef(InTag);
 }
 
-UGBPlayerHUDWidget* UGBPrimaryLayoutWidget::GetHUDWidget() const
-{
-    return HUDWidget;
-}
-
 void UGBPrimaryLayoutWidget::SetHUDVisible(bool bVisibie)
 {
-    GB_NULL_CHECK(HUDWidget);
-    HUDWidget->SetVisibility(bVisibie ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+    if (HUDWidget)
+    {
+        HUDWidget->SetVisibility(bVisibie ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+    }
 }
 
 void UGBPrimaryLayoutWidget::SetHUDWidget(UAbilitySystemComponent* InASC)
 {
     GB_NULL_CHECK(InASC);
-
     GB_NULL_CHECK(HUDWidgetClass);
-
+    
     HUDWidget = CreateWidget<UGBPlayerHUDWidget>(GetWorld(), HUDWidgetClass);
     HUDWidget->InitializeAttributeInfo(InASC);
-
+    
     TArray<TPair<FGameplayTag, UTexture2D*>> SkillIconInfoList;
-
     TArray<FGameplayAbilitySpec>& Abilities = InASC->GetActivatableAbilities();
     uint8 Skillndex = 1;
-
+    
     for (const FGameplayAbilitySpec& AbilitySpec : Abilities)
     {
         UGBGA_PlayerSkill* SkillAbility = Cast<UGBGA_PlayerSkill>(AbilitySpec.Ability);
@@ -57,35 +55,35 @@ void UGBPrimaryLayoutWidget::SetHUDWidget(UAbilitySystemComponent* InASC)
             }
         }
     }
-
+    
     HUDWidget->SetSkillIconTexture(SkillIconInfoList);
-
+    
     InASC->GetGameplayAttributeValueChangeDelegate(UGBHealthAttributeSet::GetCurrentHealthAttribute()).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnHealthAttributeChanged);
     InASC->GetGameplayAttributeValueChangeDelegate(UGBHealthAttributeSet::GetMaxHealthAttribute()).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnHealthAttributeChanged);
     InASC->GetGameplayAttributeValueChangeDelegate(UGBSpeedAttributeSet::GetCurrnetStaminaAttribute()).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSpeedAttributeChanged);
     InASC->GetGameplayAttributeValueChangeDelegate(UGBSpeedAttributeSet::GetMaxStaminaAttribute()).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSpeedAttributeChanged);
-
+    
     const FGameplayTagContainer& BuffTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Buff);
     for (const FGameplayTag BuffTag : BuffTags)
     {
         InASC->RegisterGameplayTagEvent(BuffTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnBuffStateChanged);
     }
-
+    
     const FGameplayTagContainer& DebuffTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Debuff);
     const FGameplayTagContainer& CooldownTags = UGameplayTagsManager::Get().RequestGameplayTagChildren(GBTag::State_Cooldown);
-
+    
     for (const FGameplayTag DebuffTag : DebuffTags)
     {
         InASC->RegisterGameplayTagEvent(DebuffTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnBuffStateChanged);
     }
-
+    
     for (const FGameplayTag CooldownTag : CooldownTags)
     {
         InASC->RegisterGameplayTagEvent(CooldownTag, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSkillCooldownChanged);
     }
-
+    
     InASC->RegisterGameplayTagEvent(GBTag::State_Combat_Equipped, EGameplayTagEventType::NewOrRemoved).AddUObject(HUDWidget, &UGBPlayerHUDWidget::OnSkillInfoChanged);
-
+    
     HUDWidget->AddToViewport();
 }
 
@@ -108,7 +106,9 @@ void UGBPrimaryLayoutWidget::RegisterWidgetStack(UPARAM(meta = (Categories = "UI
 
 TOptional<FUIInputConfig> UGBPrimaryLayoutWidget::GetDesiredInputConfig() const
 {
-    return FUIInputConfig(ECommonInputMode::All, EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown, EMouseLockMode::LockOnCapture, true);
+    UGBUISubsystem::Get(this)->SetHUDVisible(true);
+
+    return FUIInputConfig(ECommonInputMode::All, EMouseCaptureMode::CapturePermanently, EMouseLockMode::LockOnCapture, true);
 }
 
 void UGBPrimaryLayoutWidget::NativeOnInitialized()
@@ -118,16 +118,26 @@ void UGBPrimaryLayoutWidget::NativeOnInitialized()
     if (InventoryAction.IsNull() == false)
     {
         RegisterUIActionBinding(FBindUIActionArgs(
-                InventoryAction,
-                false,
-                FSimpleDelegate::CreateUObject(this, &UGBPrimaryLayoutWidget::OnInventoryActionTriggered)
-            )
-        );
+            InventoryAction,
+            false,
+            FSimpleDelegate::CreateUObject(this, &UGBPrimaryLayoutWidget::OnInventoryActionTriggered)
+        ));
     }
+}
+
+void UGBPrimaryLayoutWidget::NativeOnActivated()
+{
+    Super::NativeOnActivated();
 }
 
 bool UGBPrimaryLayoutWidget::NativeOnHandleBackAction()
 {
+    UWidget* GameMenuActivateWidget = RegisteredWidgetStackMap[GBTag::UI_WidgetStack_GameMenu]->GetActiveWidget();
+    if (Cast<UGBOptionsScreenWidget>(GameMenuActivateWidget))
+    {
+        return true;
+    }
+
     UGBAsyncAction_PushSoftWidget* PushAction = UGBAsyncAction_PushSoftWidget::PushSoftWidget(this, GetOwningPlayerController(),
         UGBUIFunctionLibrary::GetSoftWidgetClassByTag(GBTag::UI_Widget_MainMenuScreen), GBTag::UI_WidgetStack_GameMenu);
     if (PushAction)
@@ -141,6 +151,13 @@ bool UGBPrimaryLayoutWidget::NativeOnHandleBackAction()
 
 void UGBPrimaryLayoutWidget::OnInventoryActionTriggered()
 {
+    UCommonActivatableWidget* ActivatedWidget = RegisteredWidgetStackMap[GBTag::UI_WidgetStack_GameMenu]->GetActiveWidget();
+    if (ActivatedWidget && Cast<UGBInventoryScreenWidget>(ActivatedWidget))
+    {
+        ActivatedWidget->DeactivateWidget();
+        return;
+    }
+
     UGBAsyncAction_PushSoftWidget* PushAction = UGBAsyncAction_PushSoftWidget::PushSoftWidget(this, GetOwningPlayerController(),
         UGBUIFunctionLibrary::GetSoftWidgetClassByTag(GBTag::UI_Widget_Inventory), GBTag::UI_WidgetStack_GameMenu);
     if (PushAction)

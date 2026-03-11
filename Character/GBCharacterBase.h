@@ -53,12 +53,12 @@ private:
     UPROPERTY(Transient)
     TObjectPtr<UGBAbilitySystemComponent>   AbilitySystemComponent;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "BaseCharacter")
     TObjectPtr<UGBMovementStateComponent>   MovementStateComponent;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "BaseCharacter")
     TObjectPtr<UGBCombatComponent>          CombatComponent;
 
-    UPROPERTY(EditDefaultsOnly, meta = (AllowedTypes = "CharacterData"))
+    UPROPERTY(EditDefaultsOnly, Category = "BaseCharacter", meta = (AllowedTypes = "CharacterData"))
     FPrimaryAssetId                         CharacterDataAssetId;
 };

@@ -107,7 +107,7 @@ bool UGBInventoryComponent::Server_Merge(int32 FromIndex, int32 ToIndex)
     int32 MaxStack = -1;
 
     UGBAssetLoadSubsystem::Get(this)->LoadItemDataByAssetId(FromSlot.ItemId, 
-        FOnItemLoaded::CreateWeakLambda(this, 
+        FGBOnItemLoaded::CreateWeakLambda(this, 
         [this, MaxStack](bool bSuccess, UGBBaseItemData* ItemData) mutable
         {
             if (bSuccess && ItemData)

@@ -110,7 +110,7 @@ void UGBAssetLoadSubsystem::LoadCharacterDataByClassType(const EGBCharacterClass
     LoadCharacterDataByTag(AssetNameTag, GBASC);
 }
 
-void UGBAssetLoadSubsystem::LoadItemDataByAssetId(const FPrimaryAssetId& AssetId, FOnItemLoaded OnLoaded)
+void UGBAssetLoadSubsystem::LoadItemDataByAssetId(const FPrimaryAssetId& AssetId, FGBOnItemLoaded OnLoaded)
 {
     UGBBaseItemData* ItemDataAsset = nullptr;
 

@@ -6,6 +6,11 @@
 
 void UGBTabListWidgetBase::RequestRegisterTab(const FName& InTabId, const FText& InTabDisplayName)
 {
+    if (GetRegisteredTabsByID().Contains(InTabId))
+    {
+        return;
+    }
+
     RegisterTab(InTabId, TabButtonEntryWidgetClass, nullptr);
 
     UGBCommonButtonBase* FoundedButton = Cast<UGBCommonButtonBase>(GetTabButtonBaseByID(InTabId));

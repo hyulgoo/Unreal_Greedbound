@@ -56,7 +56,7 @@ private:
     UPROPERTY(Transient)
     TObjectPtr<UGBOptionsDataRegistry>          OptionsDataRegistry;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Options Screen", meta = (RowType = "/Script/CommonUI.CommonInputActionDataBase"))
+	UPROPERTY(EditDefaultsOnly, Category = "Options", meta = (RowType = "/Script/CommonUI.CommonInputActionDataBase"))
     FDataTableRowHandle                         ResetAction;
 
     FUIActionBindingHandle                      ResetActionHandle;

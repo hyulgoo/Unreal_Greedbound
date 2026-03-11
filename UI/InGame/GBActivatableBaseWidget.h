@@ -15,12 +15,19 @@ class GREEDBOUND_API UGBActivatableBaseWidget : public UCommonActivatableWidget
 {
 	GENERATED_BODY()
 
+public:
+    UGBActivatableBaseWidget(const FObjectInitializer& ObjectInitializer);
     // UI 전용 컨트롤러로 컨트롤러 클래스 교체해야할 수 있음
 protected:
     UFUNCTION(BlueprintPure)
     APlayerController*                  GetOwningPlayerController();
 
     virtual TOptional<FUIInputConfig>   GetDesiredInputConfig() const override;
+    virtual void                        NativeOnDeactivated() override;
+    
+protected:
+    UPROPERTY(EditDefaultsOnly, Category = "Activation")
+    uint8                               bFocusOnViewportAtDeactivate : 1;
 
 private:
     TWeakObjectPtr<APlayerController>   CachedOwningPC;

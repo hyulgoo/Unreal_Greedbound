@@ -29,34 +29,26 @@ UCLASS()
 class GREEDBOUND_API AGBDungeonGameMode : public AGBGameMode
 {
     GENERATED_BODY()
-    
+
 public:
-                                                    AGBDungeonGameMode();
+    AGBDungeonGameMode();
 
     FORCEINLINE void                                SetAssignedMatchInfo(const FGBMatchInfo& InMatchInfo) { AssignedMatchInfo = InMatchInfo; }
-
-    FORCEINLINE const                               FGBMatchInfo& GetAssignedMatchInfo() { return AssignedMatchInfo; }
+    FORCEINLINE const FGBMatchInfo&                 GetAssignedMatchInfo() { return AssignedMatchInfo; }
 
     void                                            InitFromAssignedMatchInfo();
-
     void                                            HandleClientLoadedDungeonMap(AGBPlayerController* PlayerController);
-
     void                                            HandleDungeonMapLoadedCountChanged();
 
-
-    
 protected:
     virtual void                                    StartPlay() override;
-
     virtual void                                    BeginPlay() override;
-     
+
     // 접속 직전(토큰/옵션 확인)
-    virtual void                                    PreLogin(const FString& Options, const FString& Address, 
-                                                        const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
+    virtual void                                    PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 
     // 컨트롤러 생성 후(카운트/팀 반영)
-    virtual FString                                 InitNewPlayer(APlayerController* NewPC, const FUniqueNetIdRepl& UniqueId, 
-                                                        const FString& Options, const FString& Portal) override;
+    virtual FString                                 InitNewPlayer(APlayerController* NewPC, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal) override;
 
     virtual void                                    PostLogin(APlayerController* NewPlayer) override;
 
@@ -64,11 +56,9 @@ protected:
     virtual UClass*                                 GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
     virtual void                                    Logout(AController* Exiting) override;
-
     virtual void                                    RestartPlayer(AController* NewPlayer) override;
 
-private :
- 
+private:
     int32                                           GetActivePlayerCount() const;
     void                                            RequestServerShutdown() const;
 
@@ -86,7 +76,6 @@ private :
     bool                                            GetClassPresentationFromPS(const AGBPlayerState* PS, FGBClassPresentation& Out) const;
     TSubclassOf<APawn>                              ChoosePawnFromPS(const AGBPlayerState* PS) const;
     TSubclassOf<AHUD>                               ChooseHUDFromPS(const AGBPlayerState* PS) const;
-
 
 private:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Class|Presentation", meta = (AllowPrivateAccess = "true"))

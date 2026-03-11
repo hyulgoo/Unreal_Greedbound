@@ -84,7 +84,6 @@ void UGBConfirmScreenWidget::InitConfirmScreen(UGBConfirmScreenInfoObject* InScr
 
     for (FGBConfirmScreenButtonInfo& AvailiableButtonInfo : InScreenInfoObject->AvaliableScreenButtons)
     {
-
         UGBCommonButtonBase* AddedButton = DEB_Buttons->CreateEntry<UGBCommonButtonBase>();
         AddedButton->SetButtonText(AvailiableButtonInfo.ButtonTextToDisplay);
         AddedButton->OnClicked().AddLambda(

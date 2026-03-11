@@ -51,4 +51,6 @@ public:
 private:
     UPROPERTY(Transient)
     TObjectPtr<UGBPrimaryLayoutWidget>      CreatedPrimaryLayoutWidget;
+
+    bool                                    bIsPushingWidget;
 };

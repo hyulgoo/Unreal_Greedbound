@@ -25,11 +25,12 @@ public:
     void                                SetSlotIndex(int32 Index) { SlotIndex = Index; }
     int32                               GetSlotIndex() const { return SlotIndex; }
 
-    void                                OnItemDataLoaded(bool bSuccessd, UGBBaseItemData* ItemData);
-
 private:
+    void                                OnItemDataLoaded(bool bSuccessd, UGBBaseItemData* ItemData);
     void                                OnOwingListDataObjectSet(UGBListDataObject_Base* InOwningListDataObject);
     void                                OnOwningListDataObjectModified(UGBListDataObject_Base* InListDataObject, EGBOptionsListDataModifyReason ModifyReason);
+
+    void                                SetItemSlot(int32 Count, const FSlateBrush& IconImage);
 
 private:
     UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
@@ -37,6 +38,9 @@ private:
 
     int32                               SlotIndex;
 
-    UPROPERTY(Transient)
+    UPROPERTY(Transient, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
     TObjectPtr<UGBListDataObject_Item>  CachedItemDataObject;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UGBBaseItemData>         CachedItemData;
 };

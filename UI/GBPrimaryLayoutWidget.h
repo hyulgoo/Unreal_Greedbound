@@ -11,7 +11,6 @@
 class UCommonActivatableWidgetContainerBase;
 class UAbilitySystemComponent;
 class UGBPlayerHUDWidget;
-class UGBInventoryScreenWidget;
 
 UCLASS(Abstract, BlueprintType, meta = (DisableNaiveTick))
 class GREEDBOUND_API UGBPrimaryLayoutWidget : public UGBActivatableBaseWidget
@@ -19,7 +18,6 @@ class GREEDBOUND_API UGBPrimaryLayoutWidget : public UGBActivatableBaseWidget
     GENERATED_BODY()
 public:
     UCommonActivatableWidgetContainerBase*  FindWidgetStackByTag(const FGameplayTag& InTag) const;
-    UGBPlayerHUDWidget*                     GetHUDWidget() const;
     void                                    SetHUDVisible(bool bVisibie);
     void                                    SetHUDWidget(UAbilitySystemComponent* InASC);
 
@@ -30,6 +28,7 @@ protected:
 private:
     virtual TOptional<FUIInputConfig>       GetDesiredInputConfig() const override final;
     virtual void                            NativeOnInitialized() override final;
+    virtual void                            NativeOnActivated() override final;
     virtual bool                            NativeOnHandleBackAction() override final;
 
     void                                    OnInventoryActionTriggered();
@@ -46,6 +45,6 @@ private:
     UPROPERTY(Transient)
     TObjectPtr<UGBPlayerHUDWidget>          HUDWidget;
 
-    UPROPERTY(EditDefaultsOnly)
+    UPROPERTY(EditDefaultsOnly, Category = "PrimaryLayout")
     TSubclassOf<UGBPlayerHUDWidget>         HUDWidgetClass;
 };

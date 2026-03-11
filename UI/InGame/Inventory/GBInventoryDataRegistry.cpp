@@ -21,6 +21,12 @@ void UGBInventoryDataRegistry::InitInventoryDataRegistry(int32 MaxInventoryCount
     }
 
     RegisteredInventoryTabCollections.Add(InventoryTabCollection);
+
+    UGBListDataObject_Collection* TestTabCollection = NewObject<UGBListDataObject_Collection>();
+    TestTabCollection->SetDataID(FName("TestTabCollection"));
+    TestTabCollection->SetDataDisplayName(FText::FromString(TEXT("Test")));
+
+    RegisteredInventoryTabCollections.Add(TestTabCollection);
 }
 
 const TArray<UGBListDataObject_Collection*>& UGBInventoryDataRegistry::GetRegisteredOptionsTabCollections() const

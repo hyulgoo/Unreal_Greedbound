@@ -18,6 +18,7 @@
     MakeShared<FGBOptionsDataInteractionHelper>(GET_FUNCTION_NAME_STRING_CHECKED(UGBGameUserSettings, SetterOrGetterFuncName))
 
 #define GET_DESCRIPTION(InKey) LOCTABLE("/Game/GB/Data/UI/ST_OptionScreenDescription.ST_OptionScreenDescription", InKey)
+#define GET_MENU_NAME(InKey) LOCTABLE("/Game/GB/Data/UI/ST_Menu.ST_Menu", InKey)
 
 void UGBOptionsDataRegistry::InitOptionsDataRegistry(ULocalPlayer* InOwningLocalPlayer)
 {
@@ -81,31 +82,31 @@ void UGBOptionsDataRegistry::FindChildListDataRecursively(UGBListDataObject_Base
 // Gameplay
 void UGBOptionsDataRegistry::InitGameplayCollectionTab()
 {
-    //UGBListDataObject_Collection* GameplayTabCollection = NewObject<UGBListDataObject_Collection>();
-    //GameplayTabCollection->SetDataID(FName("GameplayTabCollection"));
-    //GameplayTabCollection->SetDataDisplayName(FText::FromString(TEXT("Gameplay")));
-    //
-    //{
-    //    UGBListDataObject_String* LocalizationSetting = NewObject<UGBListDataObject_String>();
-    //    LocalizationSetting->SetDataID(FName("Language"));
-    //    LocalizationSetting->SetDataDisplayName(FText::FromString(TEXT("Language Setting")));
-    //    LocalizationSetting->AddDynamicOption(TEXT("ko"), FText::FromString(TEXT("Korean")));
-    //    LocalizationSetting->AddDynamicOption(TEXT("en"), FText::FromString(TEXT("English")));
-    //    LocalizationSetting->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetCurrentLanguage));
-    //    LocalizationSetting->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetCurrentLanguage));
-    //    LocalizationSetting->SetShouldApplySettingsImmediately(true);
-    //
-    //    GameplayTabCollection->AddChildListData(LocalizationSetting);
-    //}
-    //
-    //RegisteredOptionsTabCollections.Add(GameplayTabCollection);
+    UGBListDataObject_Collection* GameplayTabCollection = NewObject<UGBListDataObject_Collection>();
+    GameplayTabCollection->SetDataID(FName("GameplayTabCollection"));
+    GameplayTabCollection->SetDataDisplayName(GET_MENU_NAME("OptionsMenu_Gameplay"));
+    
+    {
+        UGBListDataObject_String* LocalizationSetting = NewObject<UGBListDataObject_String>();
+        LocalizationSetting->SetDataID(FName("Language"));
+        LocalizationSetting->SetDataDisplayName(FText::FromString(TEXT("Language Setting")));
+        LocalizationSetting->AddDynamicOption(TEXT("en"), FText::FromString(TEXT("English")));
+        LocalizationSetting->AddDynamicOption(TEXT("ko"), FText::FromString(TEXT("Korean")));
+        LocalizationSetting->SetDataDynamicGetter(MAKE_OPTIONS_DATA_CONTROL(GetCurrentLanguage));
+        LocalizationSetting->SetDataDynamicSetter(MAKE_OPTIONS_DATA_CONTROL(SetCurrentLanguage));
+        LocalizationSetting->SetShouldApplySettingsImmediately(true);
+    
+        GameplayTabCollection->AddChildListData(LocalizationSetting);
+    }
+    
+    RegisteredOptionsTabCollections.Add(GameplayTabCollection);
 }
 
 void UGBOptionsDataRegistry::InitAudioCollectionTab()
 {
     UGBListDataObject_Collection* AudioTabCollection = NewObject<UGBListDataObject_Collection>();
     AudioTabCollection->SetDataID(FName("AudioTabCollection"));
-    AudioTabCollection->SetDataDisplayName(FText::FromString(TEXT("Audio")));
+    AudioTabCollection->SetDataDisplayName(GET_MENU_NAME("OptionsMenu_Audio"));
 
     // Volume
     {
@@ -220,7 +221,7 @@ void UGBOptionsDataRegistry::InitVideoCollectionTab()
     const FText WindowModeDesc = LOCTABLE("/Game/GB/Data/UI/ST_OptionScreenDescription.ST_OptionScreenDescription", "WindowModeDescKey");
     UGBListDataObject_Collection* VideoTabCollection = NewObject<UGBListDataObject_Collection>();
     VideoTabCollection->SetDataID(FName("VideoTabCollection"));
-    VideoTabCollection->SetDataDisplayName(FText::FromString(TEXT("Video")));
+    VideoTabCollection->SetDataDisplayName(GET_MENU_NAME("OptionsMenu_Video"));
 
     UGBListDataObject_StringEnum* CreatedWindowMode = nullptr;
 
@@ -593,7 +594,7 @@ void UGBOptionsDataRegistry::InitControlCollectionTab(ULocalPlayer* InOwningLoca
 {
     UGBListDataObject_Collection* ControlTabCollection = NewObject<UGBListDataObject_Collection>();
     ControlTabCollection->SetDataID(FName("ControlTabCollection"));
-    ControlTabCollection->SetDataDisplayName(FText::FromString(TEXT("Control")));
+    ControlTabCollection->SetDataDisplayName(GET_MENU_NAME("OptionsMenu_Control"));
 
     UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem = InOwningLocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
     GB_NULL_CHECK(EnhancedInputSubsystem);

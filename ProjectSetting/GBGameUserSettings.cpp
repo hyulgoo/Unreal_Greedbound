@@ -24,7 +24,12 @@ UGBGameUserSettings* UGBGameUserSettings::Get()
 void UGBGameUserSettings::SetCurrentLanguage(const FString& InLanguege)
 {
     CurrentLanguage = InLanguege;
-    FInternationalization::Get().SetCurrentLanguage(CurrentLanguage);
+
+    FInternationalization::Get().SetCurrentCulture(CurrentLanguage);
+    FTextLocalizationManager::Get().RefreshResources();
+
+    GConfig->SetString(TEXT("Internationalization"), TEXT("Culture"), *CurrentLanguage, GGameUserSettingsIni);
+    GConfig->Flush(false, GGameUserSettingsIni);
 }
 
 void UGBGameUserSettings::SetOverallVolume(float InVolume)

@@ -11,7 +11,7 @@ class UGBAbilitySystemComponent;
 class UGBBaseItemData;
 enum class EGBCharacterClassType : uint8;
 
-DECLARE_DELEGATE_TwoParams(FOnItemLoaded, bool bSuccess, UGBBaseItemData* LoadedItemData);
+DECLARE_DELEGATE_TwoParams(FGBOnItemLoaded, bool bSuccess, UGBBaseItemData* LoadedItemData);
 
 UCLASS()
 class GREEDBOUND_API UGBAssetLoadSubsystem : public UGameInstanceSubsystem
@@ -25,5 +25,5 @@ public:
     void                            LoadCharacterDataByTag(const FGameplayTag& AssetNameTag, UGBAbilitySystemComponent* GBASC);
     void                            LoadCharacterDataByClassType(const EGBCharacterClassType ClassType, UGBAbilitySystemComponent* GBASC);
 
-    void                            LoadItemDataByAssetId(const FPrimaryAssetId& AssetId, FOnItemLoaded OnLoaded);
+    void                            LoadItemDataByAssetId(const FPrimaryAssetId& AssetId, FGBOnItemLoaded OnLoaded);
 };

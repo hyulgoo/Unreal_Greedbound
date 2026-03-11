@@ -10,6 +10,7 @@ class UCommonTileView;
 class UGBTabListWidgetBase;
 class UGBInventoryComponent;
 class UGBInventoryDataRegistry;
+class UGBInventoryItemPopupWidget;
 
 UCLASS(Abstract, BlueprintType, meta = (DisableNaiveTick))
 class GREEDBOUND_API UGBInventoryScreenWidget : public UGBActivatableBaseWidget
@@ -30,6 +31,7 @@ protected:
     // CommonActivatableWidget Interface
     virtual UWidget*                        NativeGetDesiredFocusTarget() const override final;
     virtual void                            NativeOnActivated() override final;
+    virtual void                            NativeOnDeactivated() override final;
 
 private:
     void                                    OnItemSlotAdded(int32 SlotIndex, FPrimaryAssetId Id, int32 Count);
@@ -37,6 +39,8 @@ private:
     void                                    OnItemSlotRemoved(int32 SlotIndex, FPrimaryAssetId Id, int32 Count);
     void                                    OnTileViewItemHovered(UObject* InHoveredItem, bool bWasHovered);
     void                                    OnTileViewItemSelected(UObject* InSelectedItem);
+
+    void                                    HideItemHoverPopup();
 
 private:
     UPROPERTY(Transient)
@@ -54,10 +58,16 @@ private:
     UPROPERTY(meta = (BindWidget))
     TObjectPtr<UCommonTileView>             CTV_Bag;
 
-    UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UWidget>                     ItemDescriptionPopupWidget;
+    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+    TSubclassOf<UGBInventoryItemPopupWidget> ItemHoveredPopupWidgetClass;
+    
+    UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+    TSubclassOf<UWidget>                     ItemRightClickedPopupWidgetClass;
 
-    UPROPERTY(EditDefaultsOnly)
-    TObjectPtr<UWidget>                     ItemActionPopupWidget;  
+    UPROPERTY(Transient)
+    TObjectPtr<UGBInventoryItemPopupWidget>  ItemHoveredPopupWidget;
+
+    UPROPERTY(Transient)
+    TObjectPtr<UWidget>                      ItemRightClickedPopupWidget;
 
 };

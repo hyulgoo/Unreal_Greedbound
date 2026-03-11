@@ -2,6 +2,7 @@
 
 #include "GBInventoryScreenWidget.h"
 #include "CommonTileView.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Define/GBDefine.h"
 #include "Data/GBItemData.h"
 #include "Character/Player/GBPlayerState.h"
@@ -11,6 +12,7 @@
 #include "UI/InGame/Inventory/GBInventoryDataRegistry.h"
 #include "UI/InGame/Inventory/DataObjects/GBListDataObject_Item.h"
 #include "UI/InGame/Options/DataObjects/GBListDataObject_Collection.h"
+#include "GBInventoryItemPopupWidget.h"
 
 UGBInventoryDataRegistry* UGBInventoryScreenWidget::GetOrCreateDataRegistry()
 {
@@ -48,14 +50,14 @@ void UGBInventoryScreenWidget::RefreshBagItemList()
     {
         UGBListDataObject_Item* ItemDataObject = Cast<UGBListDataObject_Item>(DataList[Index]);
         GB_NULL_CHECK(ItemDataObject);
-        ItemDataObject->SetItemData(SlotList[Index].ItemId, SlotList[Index].Count);
+        ItemDataObject->SetItemSlotData(SlotList[Index].ItemId, SlotList[Index].Count);
     }
 }
 
 void UGBInventoryScreenWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
-    
+
     // Inventory
     {
         GB_NULL_CHECK(CTL_InventoryTabListWidget);
@@ -87,28 +89,41 @@ void UGBInventoryScreenWidget::NativeOnInitialized()
     {
         //CTL_InventoryTabListWidget->OnTabSelected.AddUnique(this, &UGBInventoryScreenWidget::OnInventoryTabSelected);
     }
+
+    // Popup
+    {
+        if (ItemHoveredPopupWidgetClass)
+        {
+            ItemHoveredPopupWidget = CreateWidget<UGBInventoryItemPopupWidget>(GetOwningPlayer(), ItemHoveredPopupWidgetClass);
+            if (ItemHoveredPopupWidget)
+            {
+                ItemHoveredPopupWidget->AddToViewport();
+                ItemHoveredPopupWidget->SetVisibility(ESlateVisibility::Collapsed);
+            }
+        }
+    }
 }
 
 UWidget* UGBInventoryScreenWidget::NativeGetDesiredFocusTarget() const
 {
-    UGBUISubsystem::Get(GetOwningLocalPlayer())->SetHUDVisible(false);
-
-    UObject* SelectedObject = CTV_Bag->GetSelectedItem();
-    if (SelectedObject)
+    if (CTV_Bag && CTV_Bag->GetNumItems() > 0)
     {
-        UUserWidget* SelectedEntryWidget = CTV_Bag->GetEntryWidgetFromItem(SelectedObject);
-        if (SelectedEntryWidget)
-        {
-            return SelectedEntryWidget;
-        }
+        return CTV_Bag;
     }
 
-    return CTV_Bag;
+    if (CTL_InventoryTabListWidget)
+    {
+        return CTL_InventoryTabListWidget;
+    }
+
+    return Super::NativeGetDesiredFocusTarget();
 }
 
 void UGBInventoryScreenWidget::NativeOnActivated()
 {
     Super::NativeOnActivated();
+
+    UGBUISubsystem::Get(GetOwningPlayerController())->SetHUDVisible(false);
 
     const TArray<UGBListDataObject_Collection*>& RegisteredTabCollections = GetOrCreateDataRegistry()->GetRegisteredOptionsTabCollections();
     for (UGBListDataObject_Collection* TabCollection : RegisteredTabCollections)
@@ -121,8 +136,16 @@ void UGBInventoryScreenWidget::NativeOnActivated()
     }
 }
 
+void UGBInventoryScreenWidget::NativeOnDeactivated()
+{
+    Super::NativeOnDeactivated();
+
+    HideItemHoverPopup();
+}
+
 void UGBInventoryScreenWidget::OnItemSlotAdded(int32 SlotIndex, FPrimaryAssetId Id, int32 Count)
 {
+    // TODO 신규아이템 습득 시 강조효과
 }
 
 void UGBInventoryScreenWidget::OnItemSlotChanged(int32 SlotIndex, FPrimaryAssetId Id, int32 Count)
@@ -135,19 +158,53 @@ void UGBInventoryScreenWidget::OnItemSlotChanged(int32 SlotIndex, FPrimaryAssetI
     UGBListDataObject_Item* ItemDataObject = Cast<UGBListDataObject_Item>(CTV_Bag->GetItemAt(SlotIndex));
     GB_NULL_CHECK(ItemDataObject);
 
-    ItemDataObject->SetItemData(Id, Count);
+    ItemDataObject->SetItemSlotData(Id, Count);
 }
 
 void UGBInventoryScreenWidget::OnItemSlotRemoved(int32 SlotIndex, FPrimaryAssetId Id, int32 Count)
-{   
+{
+    // TODO 퀵슬롯에서 해제
 }
 
 void UGBInventoryScreenWidget::OnTileViewItemHovered(UObject* InHoveredItem, bool bWasHovered)
 {
+    if (bWasHovered == false)
+    {
+        HideItemHoverPopup();
+        return;
+    }
+
+    GB_NULL_CHECK(InHoveredItem);
+    GB_NULL_CHECK(ItemHoveredPopupWidget);
+
+    UGBListDataObject_Item* ItemDataObject = Cast<UGBListDataObject_Item>(InHoveredItem);
+    GB_NULL_CHECK(ItemDataObject);
+
+    ItemDataObject->TryGetItemData(GetOwningPlayer(), FGBOnItemLoaded::CreateLambda(
+        [this, ItemDataObject](bool bSuccess, UGBBaseItemData* LoadedItemData) 
+        {
+            if (bSuccess)
+            {
+                FVector2D MousePosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(this);
+                MousePosition += FVector2D(20.f, 0.f);
+                ItemHoveredPopupWidget->SetPositionInViewport(MousePosition, false);
+                ItemHoveredPopupWidget->SetPopupByItemData(LoadedItemData, ItemDataObject->GetItemSlotData().Count);
+                ItemHoveredPopupWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+            }
+        }
+    ));
 }
 
 void UGBInventoryScreenWidget::OnTileViewItemSelected(UObject* InSelectedItem)
 {
     //UGBListDataObject_Item* ItemDataobject = Cast<UGBListDataObject_Item>(InSelectedItem);
     //GB_NULL_CHECK(ItemDataobject);
+}
+
+void UGBInventoryScreenWidget::HideItemHoverPopup()
+{
+    if (ItemHoveredPopupWidget)
+    {
+        ItemHoveredPopupWidget->SetVisibility(ESlateVisibility::Collapsed);
+    }
 }
